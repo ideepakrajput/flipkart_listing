@@ -295,7 +295,7 @@
       norm(o.innerText) === norm(n.innerText)));
   }
 
-  async function setDropdown(el, value) {
+  async function setDropdown(el, value, key) {
     if (el.tagName === 'SELECT') {
       const want = norm(value);
       const opt = Array.from(el.options)
@@ -350,9 +350,16 @@
       document.body.click();
       return { ok: false, reason: `No option "${value}". Saw: ${sample || '(none)'}` };
     }
-    hit.click();
-    await sleep(140);
-    return { ok: true };
+    for (const type of ['mousedown', 'mouseup', 'click']) {
+      hit.dispatchEvent(new MouseEvent(type, { bubbles: true, cancelable: true, view: window }));
+    }
+    await sleep(220);
+    invalidate();
+    const selected = controlFor(key);
+    const shown = norm(selected?.value || selected?.innerText);
+    return shown === want || shown.includes(want)
+      ? { ok: true }
+      : { ok: false, reason: `Option "${value}" was clicked but did not stick.` };
   }
 
   function flash(el, ok) {
@@ -362,6 +369,66 @@
   }
 
   /* ---------- Fill one --------------------------------------------------- */
+  const MULTI_VALUE_FIELDS = new Set(['ingredients', 'nutrient content', 'usage instructions']);
+
+  function pressKey(el, key, code, keyCode) {
+    for (const type of ['keydown', 'keypress', 'keyup']) {
+      el.dispatchEvent(new KeyboardEvent(type, {
+        key, code, keyCode, which: keyCode,
+        bubbles: true, cancelable: true,
+      }));
+    }
+  }
+
+  function nearbyValues(el) {
+    let text = norm(el?.value);
+    let node = el;
+    for (let depth = 0; depth < 6 && node && node !== document.body; depth++, node = node.parentElement) {
+      text += ` ${norm(node.innerText || node.textContent)}`;
+      for (const input of node.querySelectorAll?.('input,textarea') || []) {
+        text += ` ${norm(input.value)}`;
+      }
+      if (text.length > 6000) break;
+    }
+    return text;
+  }
+
+  async function commitMultiValues(el, key, value) {
+    let tokenInput = el;
+    const parts = String(value).split('::').map((s) => s.trim()).filter(Boolean);
+    for (const part of parts) {
+      invalidate();
+      tokenInput = tokenInput?.isConnected ? tokenInput : controlFor(key);
+      if (!tokenInput) throw new Error('Token input disappeared after the previous value.');
+      tokenInput.focus();
+      setNativeValue(tokenInput, part);
+
+      pressKey(tokenInput, 'Enter', 'Enter', 13);
+      await sleep(100);
+      invalidate();
+      tokenInput = controlFor(key) || tokenInput;
+
+      // Some Seller Hub token controls listen only for comma, despite also
+      // advertising Enter. Try that path if Enter left the edit value intact.
+      if (norm(tokenInput.value) === norm(part)) {
+        pressKey(tokenInput, ',', 'Comma', 188);
+        await sleep(100);
+        invalidate();
+        tokenInput = controlFor(key) || tokenInput;
+      }
+
+      // Blur is the final native commit path used by a few form versions.
+      if (norm(tokenInput.value) === norm(part)) {
+        tokenInput.blur();
+        await sleep(100);
+        invalidate();
+        tokenInput = controlFor(key) || tokenInput;
+      }
+    }
+    tokenInput?.blur();
+    return parts;
+  }
+
   async function fillOne({ label, value }, target) {
     if (value === undefined || value === null || String(value).trim() === '') {
       return { label, ok: false, reason: 'Empty value.' };
@@ -379,17 +446,29 @@
     let res;
     try {
       if (kindOf(el) === 'dropdown') {
-        res = await setDropdown(el, String(value));
+        res = await setDropdown(el, String(value), key);
       } else if (el.type === 'date') {
         // <input type=date> needs yyyy-mm-dd regardless of how it displays.
         const m = String(value).match(/^(\d{2})[\/\-](\d{2})[\/\-](\d{4})$/);
         setNativeValue(el, m ? `${m[3]}-${m[2]}-${m[1]}` : String(value));
         res = { ok: !!el.value, reason: el.value ? '' : 'Date rejected - use dd/mm/yyyy.' };
       } else {
-        setNativeValue(el, String(value));
-        res = norm(el.value) === norm(value)
-          ? { ok: true }
-          : { ok: false, reason: `Value did not stick (field shows "${el.value}").` };
+        el.focus();
+        if (MULTI_VALUE_FIELDS.has(key)) {
+          await commitMultiValues(el, key, value);
+        } else {
+          setNativeValue(el, String(value));
+          el.blur();
+        }
+        await sleep(120);
+        invalidate();
+        const current = controlFor(key) || el;
+        const stuck = MULTI_VALUE_FIELDS.has(key)
+          ? String(value).split('::').map((part) => norm(part)).filter(Boolean)
+            .every((part) => nearbyValues(current).includes(part))
+          : norm(current.value) === norm(value);
+        res = stuck ? { ok: true } : { ok: false,
+          reason: `Value did not stick (field shows "${current.value || ''}").` };
       }
     } catch (e) {
       res = { ok: false, reason: String(e.message || e) };
@@ -420,14 +499,14 @@
         else if (msg.action === 'SCAN') sendResponse({ ok: true, ...scanFields() });
         else if (msg.action === 'FILL_ONE') sendResponse({ ok: true, result: await fillOne(msg.field) });
         else if (msg.action === 'FILL_MANY') {
-          // Resolve every target from the user's successful scan before writes
-          // move or re-render the form. Fill text first so dropdown React updates
-          // cannot invalidate the ordinary inputs that follow them.
+          // Dropdown changes can re-render the form, so select them first. Text
+          // and token fields are filled last and cannot then be wiped by a later
+          // dropdown render. fillOne re-resolves any target that was detached.
           const jobs = msg.fields.map((field, index) => ({
             field, index, target: controlFor(norm(field.label)),
           })).sort((a, b) =>
-            Number(a.target && kindOf(a.target) === 'dropdown') -
-            Number(b.target && kindOf(b.target) === 'dropdown'));
+            Number(b.target && kindOf(b.target) === 'dropdown') -
+            Number(a.target && kindOf(a.target) === 'dropdown'));
           const results = new Array(msg.fields.length);
           for (const { field, index, target } of jobs) {
             invalidate();

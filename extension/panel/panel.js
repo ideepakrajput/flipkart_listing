@@ -210,6 +210,16 @@ RULES
   Never reuse a manufacturing date from an older listing.
 - Match the house style of the existing listings shown below.
 - Multi-value fields must be separated by a double colon (::), e.g. "A::B::C".
+- For Nutrient Content, inspect the nutrition panel carefully and return every
+  legible "name: value" item separated by ::. Do not omit it when the panel is
+  readable, and do not invent values that are not visible.
+- Quantity is the total net quantity printed on the pack and must contain only
+  the number. Put its unit in the separate Quantity unit dropdown.
+- Maximum Shelf Life must contain only the number. Put Months/Days in its
+  separate unit dropdown.
+- Always return usage_instructions separately. Copy the label instruction when
+  present; otherwise write one short, conservative instruction appropriate to
+  the actual product shown in the photos. Never return "none".
 - Do not put the SKU code inside any title or name field.
 - Brand is exactly "Promishor". Never append product words to the brand.
 - Always generate Seller SKU ID when that field is listed. Reuse an existing
@@ -258,6 +268,10 @@ const SCHEMA = {
       type: 'string',
       description: 'Generated uppercase SKU such as DRJGRLVT_P1_100G',
     },
+    usage_instructions: {
+      type: 'string',
+      description: 'One short label-derived or conservative product-specific usage instruction',
+    },
     fields: {
       type: 'array',
       items: {
@@ -272,7 +286,7 @@ const SCHEMA = {
       },
     },
   },
-  required: ['seller_sku_id', 'fields'],
+  required: ['seller_sku_id', 'usage_instructions', 'fields'],
 };
 
 // Seed keys come from Seller Hub exports, while the live form uses shorter
@@ -301,6 +315,14 @@ const DEFAULT_LABELS = {
   minimum_order_quantity: ['minimum order quantity (minoq)'],
   shipping_provider: ['shipping provider'],
   luxury_cess: ['luxury cess'],
+  tea_form: ['tea form'],
+  quantity: ['quantity'],
+  quantity_unit: ['quantity unit'],
+  type: ['type'],
+  container_type: ['container type'],
+  pack_of: ['pack of'],
+  maximum_shelf_life: ['maximum shelf life'],
+  maximum_shelf_life_unit: ['maximum shelf life unit'],
 };
 
 const REQUESTED_DEFAULTS = {
@@ -308,6 +330,22 @@ const REQUESTED_DEFAULTS = {
   minimum_order_quantity: '1',
   shipping_provider: 'Flipkart',
   luxury_cess: '0',
+};
+
+// All five prior Tea listings are 25 g, pack 1, Herbal Tea with 24 months'
+// shelf life; four of five use Plastic Bottle. Leaves is the closest form
+// option represented by the existing leaf/flower/stem Tea SKUs.
+const PRODUCT_DEFAULTS = {
+  tea: {
+    tea_form: 'Leaves',
+    quantity: '25',
+    quantity_unit: 'g',
+    type: 'Herbal Tea',
+    container_type: 'Plastic Bottle',
+    pack_of: '1',
+    maximum_shelf_life: '24',
+    maximum_shelf_life_unit: 'Months',
+  },
 };
 
 const SKU_RX = /^[A-Z]{2,15}_P[1-9]\d*_[1-9]\d*(?:G|KG|ML|L)$/;
@@ -332,9 +370,24 @@ function addGeneratedSku(drafted, value) {
   return drafted;
 }
 
+function addUsageInstructions(drafted, value) {
+  const field = state.formFields.find((f) => nkey(f.label) === 'usage instructions');
+  const text = String(value || '').trim();
+  if (!field || !text || nkey(text) === 'none') return drafted;
+  const existing = drafted.find((f) => !f.otherTab && nkey(f.label) === 'usage instructions');
+  if (existing) {
+    existing.value = text;
+  } else {
+    drafted.push({ label: field.label, value: text, confidence: 'medium',
+      source: 'label-derived or inferred from product type' });
+  }
+  return drafted;
+}
+
 function addMissingDefaults(drafted, category) {
   const categoryDefaults = state.seed.categories[category]?.defaults || {};
-  const defaults = { ...categoryDefaults, ...REQUESTED_DEFAULTS };
+  const productDefaults = PRODUCT_DEFAULTS[category] || {};
+  const defaults = { ...categoryDefaults, ...productDefaults, ...REQUESTED_DEFAULTS };
   const present = new Set(drafted.filter((f) => !f.otherTab).map((f) => nkey(f.label)));
   for (const [key, value] of Object.entries(defaults)) {
     const aliases = DEFAULT_LABELS[key];
@@ -350,7 +403,22 @@ function addMissingDefaults(drafted, category) {
     }
     if (present.has(nkey(field.label))) continue;
     drafted.push({ label: field.label, value: String(value), confidence: 'medium',
-      source: key in REQUESTED_DEFAULTS ? 'requested default' : 'house default' });
+      source: key in REQUESTED_DEFAULTS ? 'requested default' :
+        key in productDefaults ? 'previous listing default' : 'house default' });
+    present.add(nkey(field.label));
+  }
+  return drafted;
+}
+
+function addFirstDropdownDefaults(drafted) {
+  const present = new Set(drafted.filter((f) => !f.otherTab).map((f) => nkey(f.label)));
+  for (const field of state.formFields) {
+    if (field.kind !== 'dropdown' || present.has(nkey(field.label))) continue;
+    const value = (allowedFor(field.label) || [])
+      .find((option) => !/^select(?: one)?$/i.test(option.trim()));
+    if (!value) continue;
+    drafted.push({ label: field.label, value, confidence: 'low',
+      source: 'first allowed option — review' });
     present.add(nkey(field.label));
   }
   return drafted;
@@ -405,11 +473,11 @@ $('analyse').onclick = async () => {
       apiKey, model, images, schema: SCHEMA, prompt: buildPrompt(category),
       signal: state.abortController.signal,
     });
-    state.drafted = addMissingDefaults(addGeneratedSku((out.fields || []).map((f) => {
+    state.drafted = addFirstDropdownDefaults(addMissingDefaults(addUsageInstructions(addGeneratedSku((out.fields || []).map((f) => {
       const s2 = snapLabel(f.label);
       if (s2.missing) return { ...f, otherTab: true };
       return { ...f, label: s2.label, snappedFrom: s2.snapped };
-    }), out.seller_sku_id), category);
+    }), out.seller_sku_id), out.usage_instructions), category));
     const here = state.drafted.filter((f) => !f.otherTab).length;
     const omitted = Math.max(0, state.formFields.length - here);
     render();
