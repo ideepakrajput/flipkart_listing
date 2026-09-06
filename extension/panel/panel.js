@@ -127,12 +127,14 @@ $('scan').onclick = async () => {
   // the ambiguity rather than guessing which box to write into.
   state.formFields = r.fields || [];
   state.formLabels = state.formFields.map((f) => f.label);
-  const dup = state.formFields.filter((f) => f.count > 1).length;
   const drops = state.formFields.filter((f) => f.kind === 'dropdown').length;
+  const units = state.formFields.filter((f) => / unit$/i.test(f.label)).length;
   $('scanHint').textContent =
-    `${state.formFields.length} labelled fields (${drops} dropdowns) ` +
+    `${state.formFields.length - units} labelled fields` +
+    (units ? ` + ${units} unit controls` : '') + ` (${drops} dropdowns) ` +
     `from ${r.total} controls` +
-    (r.unlabelled ? `; ${r.unlabelled} duplicate control(s) ignored` : '') +
+    (r.duplicates ? `; ${r.duplicates} duplicate control(s) ignored` : '') +
+    (r.unlabelled ? `; ${r.unlabelled} unlabelled control(s) ignored` : '') +
     '. Switch tabs in Seller Hub and rescan to cover the rest.';
   renderScanned();
   refreshAnalyse();
@@ -217,9 +219,15 @@ RULES
   the number. Put its unit in the separate Quantity unit dropdown.
 - Maximum Shelf Life must contain only the number. Put Months/Days in its
   separate unit dropdown.
+- Weight fields use kilograms. Convert label grams to kilograms (for example,
+  400 g becomes 0.4), and return only the number. Dimensions use centimetres.
 - Always return usage_instructions separately. Copy the label instruction when
   present; otherwise write one short, conservative instruction appropriate to
   the actual product shown in the photos. Never return "none".
+- Draft every descriptive field that can safely be inferred from the product
+  and photos, especially Description, Items Included, Key Features, Search
+  Keywords, Key Specs and Other Features. Omit only identifiers, measurements,
+  certifications and regulated claims that are not visible on the label.
 - Do not put the SKU code inside any title or name field.
 - Brand is exactly "Promishor". Never append product words to the brand.
 - Always generate Seller SKU ID when that field is listed. Reuse an existing
@@ -384,6 +392,16 @@ function addUsageInstructions(drafted, value) {
   return drafted;
 }
 
+function normaliseDraftValue(field) {
+  if (nkey(field.label) !== 'weight') return field;
+  const match = String(field.value).trim().match(/^(\d+(?:\.\d+)?)\s*(g|kg)?$/i);
+  if (!match) return field;
+  const amount = Number(match[1]);
+  if (match[2]?.toLowerCase() !== 'g' && amount < 50) return field;
+  return { ...field, value: String(amount / 1000), confidence: 'medium',
+    source: `${field.source}; converted grams to kg` };
+}
+
 function addMissingDefaults(drafted, category) {
   const categoryDefaults = state.seed.categories[category]?.defaults || {};
   const productDefaults = PRODUCT_DEFAULTS[category] || {};
@@ -414,8 +432,11 @@ function addFirstDropdownDefaults(drafted) {
   const present = new Set(drafted.filter((f) => !f.otherTab).map((f) => nkey(f.label)));
   for (const field of state.formFields) {
     if (field.kind !== 'dropdown' || present.has(nkey(field.label))) continue;
-    const value = (allowedFor(field.label) || [])
-      .find((option) => !/^select(?: one)?$/i.test(option.trim()));
+    const current = String(field.current || '').trim();
+    const allowed = allowedFor(field.label) || [];
+    const value = allowed.find((option) => nkey(current).includes(nkey(option))) ||
+      allowed.find((option) => !/^select(?: one)?$/i.test(option.trim())) ||
+      (!/^select(?: one)?$|^\d+ selected$/i.test(current) ? current : '');
     if (!value) continue;
     drafted.push({ label: field.label, value, confidence: 'low',
       source: 'first allowed option — review' });
@@ -476,7 +497,7 @@ $('analyse').onclick = async () => {
     state.drafted = addFirstDropdownDefaults(addMissingDefaults(addUsageInstructions(addGeneratedSku((out.fields || []).map((f) => {
       const s2 = snapLabel(f.label);
       if (s2.missing) return { ...f, otherTab: true };
-      return { ...f, label: s2.label, snappedFrom: s2.snapped };
+      return normaliseDraftValue({ ...f, label: s2.label, snappedFrom: s2.snapped });
     }), out.seller_sku_id), out.usage_instructions), category));
     const here = state.drafted.filter((f) => !f.otherTab).length;
     const omitted = Math.max(0, state.formFields.length - here);

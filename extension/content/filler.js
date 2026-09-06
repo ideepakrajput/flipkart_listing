@@ -18,7 +18,10 @@
 
   /* ---------- React-safe value setting ---------------------------------- */
   function setNativeValue(el, value) {
-    const text = String(value);
+    let text = String(value).trim();
+    if (el instanceof HTMLInputElement && el.type === 'number') {
+      text = text.replace(/\s*(?:kcal|cal|kg|mg|g|ml|l|cm|mm|m|%)$/i, '');
+    }
     if (el instanceof HTMLInputElement &&
         ((el.type === 'number' && text !== '' && !Number.isFinite(Number(text))) ||
          (el.type === 'date' && text !== '' && !/^\d{4}-\d{2}-\d{2}$/.test(text)))) {
@@ -31,6 +34,7 @@
     if (setter && setter !== own) setter.call(el, text); else el.value = text;
     el.dispatchEvent(new Event('input', { bubbles: true }));
     el.dispatchEvent(new Event('change', { bubbles: true }));
+    return text;
   }
 
   const visible = (el) => {
@@ -141,10 +145,10 @@
     return best;
   }
 
-  const UNIT_RX = /^(inr|cm|kg|g|day|days|months?|percentage|%)$/i;
+  const UNIT_RX = /^(inr|cm|mm|m|kg|g|mg|ml|l|oz|cal|kcal|days?|months?|percentage|%|ean|upc)$/i;
 
   const SKIP_TEXT_RX =
-    /^find |^minimum \d|^click |^don'?t want|^multiple values|^mandatory|^search |^\*$/i;
+    /^find |^minimum \d|^click |^don'?t want|^multiple values|^mandatory|^\*$/i;
 
   // Every short, visible piece of on-screen text, with its box.
   function textBoxes() {
@@ -241,21 +245,23 @@
       if (map.has(key)) { dropped++; continue; }
       map.set(key, { el: c.el, label: c.label, kind: kindOf(c.el) });
     }
-    return { map, dropped, total: scored.length };
+    return { map, dropped, total: controls().length };
   }
 
   let scannedMap = new Map();
 
   function scanFields() {
-    const { map, dropped } = fieldMap();
+    const { map, dropped, total } = fieldMap();
     scannedMap = map;
     const vertical = new URLSearchParams(location.hash.split('?')[1] || '').get('vertical');
     return {
       fields: Array.from(map.entries()).map(([key, v]) => ({
         key, label: v.label, kind: v.kind, count: 1,
+        current: String(v.el.value || v.el.innerText || '').trim(),
       })),
-      total: controls().length,
-      unlabelled: dropped,
+      total,
+      duplicates: dropped,
+      unlabelled: Math.max(0, total - map.size - dropped),
       vertical,
     };
   }
@@ -310,6 +316,7 @@
       return { ok: true };
     }
 
+    const fieldRoot = rowFor(el) || el.parentElement || el;
     invalidate();
     document.body.click();                 // close any menu the user left open
     await sleep(60);
@@ -356,7 +363,7 @@
     await sleep(220);
     invalidate();
     const selected = controlFor(key);
-    const shown = norm(selected?.value || selected?.innerText);
+    const shown = nearbyValues(fieldRoot.isConnected ? fieldRoot : selected);
     return shown === want || shown.includes(want)
       ? { ok: true }
       : { ok: false, reason: `Option "${value}" was clicked but did not stick.` };
@@ -369,7 +376,13 @@
   }
 
   /* ---------- Fill one --------------------------------------------------- */
-  const MULTI_VALUE_FIELDS = new Set(['ingredients', 'nutrient content', 'usage instructions']);
+  const MULTI_VALUE_FIELDS = new Set([
+    'ingredients', 'nutrient content', 'usage instructions', 'ean/upc',
+    'items included', 'dietary preference', 'additives', 'certification',
+    'manufacturing process', 'key features', 'search keywords', 'key spec 1',
+    'key spec 2', 'key spec 3', 'key spec 4', 'key spec', 'other features',
+    'other dimensions',
+  ]);
 
   function pressKey(el, key, code, keyCode) {
     for (const type of ['keydown', 'keypress', 'keyup']) {
@@ -393,12 +406,26 @@
     return text;
   }
 
-  async function commitMultiValues(el, key, value) {
+  async function tokenControl(fieldRoot, key, previous) {
+    if (previous?.isConnected) return previous;
+    invalidate();
+    let input = controlFor(key);
+    if (input) return input;
+    fieldRoot?.click();
+    await sleep(80);
+    invalidate();
+    input = controlFor(key);
+    if (input) return input;
+    return Array.from(fieldRoot?.querySelectorAll?.('input:not([readonly]),textarea') || [])
+      .filter(visible).at(-1) || null;
+  }
+
+  async function commitMultiValues(el, key, value, fieldRoot) {
     let tokenInput = el;
     const parts = String(value).split('::').map((s) => s.trim()).filter(Boolean);
     for (const part of parts) {
-      invalidate();
-      tokenInput = tokenInput?.isConnected ? tokenInput : controlFor(key);
+      if (nearbyValues(fieldRoot).includes(norm(part))) continue;
+      tokenInput = await tokenControl(fieldRoot, key, tokenInput);
       if (!tokenInput) throw new Error('Token input disappeared after the previous value.');
       tokenInput.focus();
       setNativeValue(tokenInput, part);
@@ -406,7 +433,8 @@
       pressKey(tokenInput, 'Enter', 'Enter', 13);
       await sleep(100);
       invalidate();
-      tokenInput = controlFor(key) || tokenInput;
+      tokenInput = await tokenControl(fieldRoot, key, tokenInput);
+      if (!tokenInput) continue;
 
       // Some Seller Hub token controls listen only for comma, despite also
       // advertising Enter. Try that path if Enter left the edit value intact.
@@ -414,7 +442,8 @@
         pressKey(tokenInput, ',', 'Comma', 188);
         await sleep(100);
         invalidate();
-        tokenInput = controlFor(key) || tokenInput;
+        tokenInput = await tokenControl(fieldRoot, key, tokenInput);
+        if (!tokenInput) continue;
       }
 
       // Blur is the final native commit path used by a few form versions.
@@ -422,7 +451,7 @@
         tokenInput.blur();
         await sleep(100);
         invalidate();
-        tokenInput = controlFor(key) || tokenInput;
+        tokenInput = await tokenControl(fieldRoot, key, tokenInput);
       }
     }
     tokenInput?.blur();
@@ -438,6 +467,7 @@
     const found = target?.isConnected ? target : controlFor(key);
     if (!found) return { label, ok: false, reason: 'Field not found on this tab.' };
     const el = found;
+    const fieldRoot = rowFor(el) || el.parentElement || el;
     // Move immediately: a continuing smooth scroll makes unrelated form inputs
     // appear after the dropdown snapshot and look like part of its popup.
     el.scrollIntoView({ block: 'center', behavior: 'auto' });
@@ -455,17 +485,18 @@
       } else {
         el.focus();
         if (MULTI_VALUE_FIELDS.has(key)) {
-          await commitMultiValues(el, key, value);
+          await commitMultiValues(el, key, value, fieldRoot);
         } else {
-          setNativeValue(el, String(value));
+          const written = setNativeValue(el, String(value));
           el.blur();
+          value = written;
         }
         await sleep(120);
         invalidate();
         const current = controlFor(key) || el;
         const stuck = MULTI_VALUE_FIELDS.has(key)
           ? String(value).split('::').map((part) => norm(part)).filter(Boolean)
-            .every((part) => nearbyValues(current).includes(part))
+            .every((part) => nearbyValues(fieldRoot.isConnected ? fieldRoot : current).includes(part))
           : norm(current.value) === norm(value);
         res = stuck ? { ok: true } : { ok: false,
           reason: `Value did not stick (field shows "${current.value || ''}").` };
