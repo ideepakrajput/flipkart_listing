@@ -1,0 +1,6 @@
+.gpv-hit {
+  outline: 2px solid #16a34a !important;
+  outline-offset: 1px;
+  transition: outline-color 1.2s ease-out;
+}
+.gpv-miss { outline: 2px dashed #dc2626 !important; outline-offset: 1px; }

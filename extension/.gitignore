@@ -1,0 +1,5 @@
+# never commit credentials
+*.local.js
+*.local.json
+apikey*
+.env

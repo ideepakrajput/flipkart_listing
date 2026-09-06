@@ -1,0 +1,1663 @@
+{
+  "generated_at": "2026-09-06T20:53:00",
+  "source_export": "S_listing--ui--group_cbf1310326dd4994_0509-170153_default.xls",
+  "n_listings": 46,
+  "sku_convention": {
+    "pattern": "{ABBREV}{FORM}_P{packOf}_{quantity}{UNIT}",
+    "forms": {
+      "SD": "Seed",
+      "PD": "Powder",
+      "FLT": "Flower Tea",
+      "LVT": "Leaf Tea",
+      "ST": "Stem/Strand Tea"
+    },
+    "note": "ABBREV is a hand-made consonant contraction of the product name, 2-8 chars. It is NOT algorithmic - always reuse the existing abbrev for a known product; only coin a new one for a genuinely new product."
+  },
+  "abbrev_to_products": {
+    "ALPD": [
+      "Promishor Organic Amla Powder (100 g)",
+      "Promishor Organic Amla Powder (150 g)"
+    ],
+    "BASD": [
+      "Promishor Basil Seeds Healthy Fiber Rich Superfood For Daily Wellness Basil Seeds (150 g)",
+      "Promishor Basil Seeds Healthy Fiber Rich Superfood For Daily Wellness Basil Seeds (2 x 100 g)",
+      "Promishor Basil Seeds Healthy Fiber Rich Superfood For Daily Wellness Basil Seeds (2 x 75 g)",
+      "Promishor Basil Seeds Healthy Fiber Rich Superfood For Daily Wellness Basil Seeds (200 g)"
+    ],
+    "BHGJPD": [
+      "Promishor Organic Bhringraj powder (100 g)",
+      "Promishor Organic Bhringraj powder (150 g)"
+    ],
+    "CASD": [
+      "Promishor Natural Chia Seeds Premium Superfood Rich Fiber Omega Nutrition Daily Chia Seeds (150 g)",
+      "Promishor Natural Chia Seeds Premium Superfood Rich Fiber Omega Nutrition Daily Chia Seeds (200 g)"
+    ],
+    "FXSD": [
+      "Promishor Pure Natural Flax Seeds Premium Superfood Rich Omega Fiber Nutrition Daily Brown Flax Seeds (150 g)",
+      "Promishor Pure Natural Flax Seeds Premium Superfood Rich Omega Fiber Nutrition Daily Brown Flax Seeds (2 x 100 g)",
+      "Promishor Pure Natural Flax Seeds Premium Superfood Rich Omega Fiber Nutrition Daily Brown Flax Seeds (2 x 75 g)",
+      "Promishor Pure Natural Flax Seeds Premium Superfood Rich Omega Fiber Nutrition Daily Brown Flax Seeds (200 g)"
+    ],
+    "HIBUSPD": [
+      "Promishor Organic Hibiscus Powder (100 g)",
+      "Promishor Organic Hibiscus Powder (150 g)"
+    ],
+    "HNLFPD": [
+      "Promishor Organic Henna Leaf Powder (100 g)",
+      "Promishor Organic Henna Leaf Powder (150 g)"
+    ],
+    "INGOPD": [
+      "Promishor Organic Indigo Powder (100 g)",
+      "Promishor Organic Indigo Powder (150 g)"
+    ],
+    "MIXSD": [
+      "Promishor Natural Superfood Mixed Seeds Healthy Fiber Protein Omega Daily Nutrition Mixed Seeds (150 g)",
+      "Promishor Natural Superfood Mixed Seeds Healthy Fiber Protein Omega Daily Nutrition Mixed Seeds (2 x 100 g)",
+      "Promishor Natural Superfood Mixed Seeds Healthy Fiber Protein Omega Daily Nutrition Mixed Seeds (2 x 75 g)",
+      "Promishor Natural Superfood Mixed Seeds Healthy Fiber Protein Omega Daily Nutrition Mixed Seeds (200 g)"
+    ],
+    "MORGAPD": [
+      "Promishor Organic Moringa Powder (100 g)",
+      "Promishor Organic Moringa Powder (150 g)"
+    ],
+    "MUMITIPD": [
+      "Promishor Organic Multani Mitti Powder (100 g)",
+      "Promishor Organic Multani Mitti Powder (150 g)"
+    ],
+    "PUPSD": [
+      "Promishor Premium Raw Pumpkin Seeds Natural Superfood Healthy Pumpkin Seeds (150 g)"
+    ],
+    "RTHAPD": [
+      "Promishor Organic Reetha Powder (100 g)",
+      "Promishor Organic Reetha Powder (150 g)"
+    ],
+    "SESASD": [
+      "Promishor Natural Sesame Seeds Premium Quality Protein Rich Healthy Everyday Sesame Seeds (150 g)",
+      "Promishor Natural Sesame Seeds Premium Quality Protein Rich Healthy Everyday Sesame Seeds (200 g)"
+    ],
+    "SHKAPD": [
+      "Promishor Organic Shikakai Powder (100 g)",
+      "Promishor Organic Shikakai Powder (150 g)"
+    ],
+    "SUNSD": [
+      "Promishor Raw Sunflower Seeds Natural Healthy Snack Rich Nutrition Everyday Sunflower Seeds (150 g)",
+      "Promishor Raw Sunflower Seeds Natural Healthy Snack Rich Nutrition Everyday Sunflower Seeds (2 x 100 g)",
+      "Promishor Raw Sunflower Seeds Natural Healthy Snack Rich Nutrition Everyday Sunflower Seeds (2 x 75 g)"
+    ],
+    "WAMESD": [
+      "Promishor Natural Watermelon Seeds Healthy Protein Rich Everyday Nutritious Snack Choice Watermelon Seeds (150 g)",
+      "Promishor Natural Watermelon Seeds Healthy Protein Rich Everyday Nutritious Snack Choice Watermelon Seeds (200 g)"
+    ]
+  },
+  "categories": {
+    "edible_seed": {
+      "n_listings": 23,
+      "defaults": {
+        "fulfilment_by": "Seller",
+        "procurement_sla": "1",
+        "procurement_type": "express",
+        "length_cm": "8",
+        "breadth_cm": "5",
+        "height_cm": "5",
+        "weight_kg": "0.3",
+        "local_fee": "0",
+        "zonal_fee": "0",
+        "national_fee": "0",
+        "hsn": "08029000",
+        "tax_code": "GST_5",
+        "country_of_origin": "IN",
+        "manufacturer_details": "Promishor Retail",
+        "importer_details": "Promishor Retail",
+        "packer_details": "Promishor Retail",
+        "shelf_life_months": "12",
+        "mrp": "335",
+        "selling_price": "183"
+      },
+      "inconsistent": {
+        "length_cm": {
+          "value": "8",
+          "agreement": "13/23",
+          "alternatives": [
+            "10",
+            "8.6"
+          ]
+        },
+        "breadth_cm": {
+          "value": "5",
+          "agreement": "13/23",
+          "alternatives": [
+            "8",
+            "8.5"
+          ]
+        },
+        "height_cm": {
+          "value": "5",
+          "agreement": "11/23",
+          "alternatives": [
+            "3",
+            "4",
+            "4.6"
+          ]
+        },
+        "weight_kg": {
+          "value": "0.3",
+          "agreement": "9/23",
+          "alternatives": [
+            "0.02",
+            "0.1",
+            "0.15",
+            "0.2",
+            "0.36"
+          ]
+        },
+        "hsn": {
+          "value": "08029000",
+          "agreement": "14/23",
+          "alternatives": [
+            "12079990"
+          ]
+        },
+        "shelf_life_months": {
+          "value": "12",
+          "agreement": "13/23",
+          "alternatives": [
+            "24",
+            "9"
+          ]
+        }
+      }
+    },
+    "tea": {
+      "n_listings": 5,
+      "defaults": {
+        "fulfilment_by": "Seller",
+        "procurement_sla": "1",
+        "procurement_type": "express",
+        "length_cm": "10",
+        "breadth_cm": "8",
+        "height_cm": "3",
+        "weight_kg": "0.3",
+        "local_fee": "0",
+        "zonal_fee": "0",
+        "national_fee": "0",
+        "hsn": "2106",
+        "tax_code": "GST_18",
+        "country_of_origin": "IN",
+        "manufacturer_details": "Promishor Retail",
+        "packer_details": "Promishor Retail",
+        "shelf_life_months": "24",
+        "mrp": "274",
+        "selling_price": "152"
+      },
+      "inconsistent": {}
+    },
+    "hair_treatment": {
+      "n_listings": 18,
+      "defaults": {
+        "fulfilment_by": "Seller",
+        "procurement_sla": "1",
+        "procurement_type": "express",
+        "length_cm": "10",
+        "breadth_cm": "8",
+        "height_cm": "3",
+        "weight_kg": "0.3",
+        "local_fee": "0",
+        "zonal_fee": "0",
+        "national_fee": "0",
+        "hsn": "1211",
+        "tax_code": "GST_5",
+        "country_of_origin": "IN",
+        "manufacturer_details": "Promishor Retail",
+        "packer_details": "Promishor Retail",
+        "shelf_life_months": "24",
+        "mrp": "289",
+        "selling_price": "161"
+      },
+      "inconsistent": {}
+    }
+  },
+  "title_examples": {
+    "edible_seed": [
+      {
+        "sku": "PUPSD_P1_150G",
+        "title": "Promishor Premium Raw Pumpkin Seeds Natural Superfood Healthy Pumpkin Seeds (150 g)",
+        "mrp": "391",
+        "selling_price": "200"
+      },
+      {
+        "sku": "CASD_P1_150G",
+        "title": "Promishor Natural Chia Seeds Premium Superfood Rich Fiber Omega Nutrition Daily Chia Seeds (150 g)",
+        "mrp": "321",
+        "selling_price": "178"
+      },
+      {
+        "sku": "SUNSD_P1_150G",
+        "title": "Promishor Raw Sunflower Seeds Natural Healthy Snack Rich Nutrition Everyday Sunflower Seeds (150 g)",
+        "mrp": "280",
+        "selling_price": "156"
+      },
+      {
+        "sku": "SESASD_P1_200G",
+        "title": "Promishor Natural Sesame Seeds Premium Quality Protein Rich Healthy Everyday Sesame Seeds (200 g)",
+        "mrp": "302",
+        "selling_price": "167"
+      },
+      {
+        "sku": "BASD_P1_150G",
+        "title": "Promishor Basil Seeds Healthy Fiber Rich Superfood For Daily Wellness Basil Seeds (150 g)",
+        "mrp": "310",
+        "selling_price": "173"
+      },
+      {
+        "sku": "WAMESD_P1_150G",
+        "title": "Promishor Natural Watermelon Seeds Healthy Protein Rich Everyday Nutritious Snack Choice Watermelon Seeds (150 g)",
+        "mrp": "383",
+        "selling_price": "213"
+      }
+    ],
+    "tea": [
+      {
+        "sku": "ROPTSFLT_PP1_25G",
+        "title": "Promishor Herbal Rose Petals flower Tea Herbal Tea Box (25 g)",
+        "mrp": "276",
+        "selling_price": "154"
+      }
+    ],
+    "hair_treatment": [
+      {
+        "sku": "MORGAPD_P1_100G",
+        "title": "Promishor Organic Moringa Powder (100 g)",
+        "mrp": "273",
+        "selling_price": "152"
+      },
+      {
+        "sku": "SHKAPD_P1_150G",
+        "title": "Promishor Organic Shikakai Powder (150 g)",
+        "mrp": "304",
+        "selling_price": "170"
+      },
+      {
+        "sku": "MORGAPD_P1_150G",
+        "title": "Promishor Organic Moringa Powder (150 g)",
+        "mrp": "288",
+        "selling_price": "160"
+      },
+      {
+        "sku": "INGOPD_P1_100G",
+        "title": "Promishor Organic Indigo Powder (100 g)",
+        "mrp": "290",
+        "selling_price": "162"
+      },
+      {
+        "sku": "BHGJPD_P1_100G",
+        "title": "Promishor Organic Bhringraj powder (100 g)",
+        "mrp": "275",
+        "selling_price": "154"
+      },
+      {
+        "sku": "BHGJPD_P1_150G",
+        "title": "Promishor Organic Bhringraj powder (150 g)",
+        "mrp": "292",
+        "selling_price": "163"
+      }
+    ]
+  },
+  "sku_examples": {
+    "edible_seed": [
+      {
+        "sku": "PUPSD_P1_150G",
+        "title": "Promishor Premium Raw Pumpkin Seeds Natural Superfood Healthy Pumpkin Seeds (150 g)"
+      },
+      {
+        "sku": "CASD_P1_150G",
+        "title": "Promishor Natural Chia Seeds Premium Superfood Rich Fiber Omega Nutrition Daily Chia Seeds (150 g)"
+      },
+      {
+        "sku": "SUNSD_P1_150G",
+        "title": "Promishor Raw Sunflower Seeds Natural Healthy Snack Rich Nutrition Everyday Sunflower Seeds (150 g)"
+      },
+      {
+        "sku": "SESASD_P1_200G",
+        "title": "Promishor Natural Sesame Seeds Premium Quality Protein Rich Healthy Everyday Sesame Seeds (200 g)"
+      },
+      {
+        "sku": "BASD_P1_150G",
+        "title": "Promishor Basil Seeds Healthy Fiber Rich Superfood For Daily Wellness Basil Seeds (150 g)"
+      },
+      {
+        "sku": "WAMESD_P1_150G",
+        "title": "Promishor Natural Watermelon Seeds Healthy Protein Rich Everyday Nutritious Snack Choice Watermelon Seeds (150 g)"
+      },
+      {
+        "sku": "SESASD_P1_150G",
+        "title": "Promishor Natural Sesame Seeds Premium Quality Protein Rich Healthy Everyday Sesame Seeds (150 g)"
+      },
+      {
+        "sku": "CASD_P1_200G",
+        "title": "Promishor Natural Chia Seeds Premium Superfood Rich Fiber Omega Nutrition Daily Chia Seeds (200 g)"
+      },
+      {
+        "sku": "FXSD_P2_200G",
+        "title": "Promishor Pure Natural Flax Seeds Premium Superfood Rich Omega Fiber Nutrition Daily Brown Flax Seeds (2 x 100 g)"
+      },
+      {
+        "sku": "MIXSD_P1_150G",
+        "title": "Promishor Natural Superfood Mixed Seeds Healthy Fiber Protein Omega Daily Nutrition Mixed Seeds (150 g)"
+      },
+      {
+        "sku": "FXSD_P1_200G",
+        "title": "Promishor Pure Natural Flax Seeds Premium Superfood Rich Omega Fiber Nutrition Daily Brown Flax Seeds (200 g)"
+      },
+      {
+        "sku": "FXSD_P1_150G",
+        "title": "Promishor Pure Natural Flax Seeds Premium Superfood Rich Omega Fiber Nutrition Daily Brown Flax Seeds (150 g)"
+      },
+      {
+        "sku": "WAMESD_P1_ 200G",
+        "title": "Promishor Natural Watermelon Seeds Healthy Protein Rich Everyday Nutritious Snack Choice Watermelon Seeds (200 g)"
+      },
+      {
+        "sku": "FXSD_P2_150G",
+        "title": "Promishor Pure Natural Flax Seeds Premium Superfood Rich Omega Fiber Nutrition Daily Brown Flax Seeds (2 x 75 g)"
+      },
+      {
+        "sku": "SUNSD_P2_200G",
+        "title": "Promishor Raw Sunflower Seeds Natural Healthy Snack Rich Nutrition Everyday Sunflower Seeds (2 x 100 g)"
+      },
+      {
+        "sku": "SUNSD_P2_150G",
+        "title": "Promishor Raw Sunflower Seeds Natural Healthy Snack Rich Nutrition Everyday Sunflower Seeds (2 x 75 g)"
+      },
+      {
+        "sku": "MIXSD_P1_200G",
+        "title": "Promishor Natural Superfood Mixed Seeds Healthy Fiber Protein Omega Daily Nutrition Mixed Seeds (200 g)"
+      },
+      {
+        "sku": "MIXSD_P2_200G",
+        "title": "Promishor Natural Superfood Mixed Seeds Healthy Fiber Protein Omega Daily Nutrition Mixed Seeds (2 x 100 g)"
+      },
+      {
+        "sku": "BASD_P2_200G",
+        "title": "Promishor Basil Seeds Healthy Fiber Rich Superfood For Daily Wellness Basil Seeds (2 x 100 g)"
+      },
+      {
+        "sku": "MIXSD_P2_150G",
+        "title": "Promishor Natural Superfood Mixed Seeds Healthy Fiber Protein Omega Daily Nutrition Mixed Seeds (2 x 75 g)"
+      },
+      {
+        "sku": "BASD_P2_150G",
+        "title": "Promishor Basil Seeds Healthy Fiber Rich Superfood For Daily Wellness Basil Seeds (2 x 75 g)"
+      },
+      {
+        "sku": "BASD_P1_200G",
+        "title": "Promishor Basil Seeds Healthy Fiber Rich Superfood For Daily Wellness Basil Seeds (200 g)"
+      }
+    ],
+    "hair_treatment": [
+      {
+        "sku": "MORGAPD_P1_100G",
+        "title": "Promishor Organic Moringa Powder (100 g)"
+      },
+      {
+        "sku": "SHKAPD_P1_150G",
+        "title": "Promishor Organic Shikakai Powder (150 g)"
+      },
+      {
+        "sku": "MORGAPD_P1_150G",
+        "title": "Promishor Organic Moringa Powder (150 g)"
+      },
+      {
+        "sku": "INGOPD_P1_100G",
+        "title": "Promishor Organic Indigo Powder (100 g)"
+      },
+      {
+        "sku": "BHGJPD_P1_100G",
+        "title": "Promishor Organic Bhringraj powder (100 g)"
+      },
+      {
+        "sku": "BHGJPD_P1_150G",
+        "title": "Promishor Organic Bhringraj powder (150 g)"
+      },
+      {
+        "sku": "SHKAPD_P1_100G",
+        "title": "Promishor Organic Shikakai Powder (100 g)"
+      },
+      {
+        "sku": "INGOPD_P1_150G",
+        "title": "Promishor Organic Indigo Powder (150 g)"
+      },
+      {
+        "sku": "RTHAPD_P1_150G",
+        "title": "Promishor Organic Reetha Powder (150 g)"
+      },
+      {
+        "sku": "RTHAPD_P1_100G",
+        "title": "Promishor Organic Reetha Powder (100 g)"
+      },
+      {
+        "sku": "HIBUSPD_P1_150G",
+        "title": "Promishor Organic Hibiscus Powder (150 g)"
+      },
+      {
+        "sku": "MUMITIPD_P1_150G",
+        "title": "Promishor Organic Multani Mitti Powder (150 g)"
+      },
+      {
+        "sku": "HIBUSPD_P1_100G",
+        "title": "Promishor Organic Hibiscus Powder (100 g)"
+      },
+      {
+        "sku": "HNLFPD_P1_150G",
+        "title": "Promishor Organic Henna Leaf Powder (150 g)"
+      },
+      {
+        "sku": "ALPD_P1_150G",
+        "title": "Promishor Organic Amla Powder (150 g)"
+      },
+      {
+        "sku": "ALPD_P1_100G",
+        "title": "Promishor Organic Amla Powder (100 g)"
+      },
+      {
+        "sku": "HNLFPD_P1_100G",
+        "title": "Promishor Organic Henna Leaf Powder (100 g)"
+      },
+      {
+        "sku": "MUMITIPD_P1_100G",
+        "title": "Promishor Organic Multani Mitti Powder (100 g)"
+      }
+    ],
+    "tea": [
+      {
+        "sku": "LEMGRST_P1_25G",
+        "title": "Promishor LEMGRST_P1_25G Herbal Tea Plastic Bottle (25 g)"
+      },
+      {
+        "sku": "HIBUSFLT_P1_25G",
+        "title": "Promishor HIBUSFLT_P1_25G Herbal Tea Plastic Bottle (25 g)"
+      },
+      {
+        "sku": "SPRMINLVT_P1_25G",
+        "title": "Promishor SPRMINLVT_P1_25G Herbal Tea Plastic Bottle (25 g)"
+      },
+      {
+        "sku": "CMOMFLT_P1_25G",
+        "title": "Promishor CMOMFLT_P1_25G Herbal Tea Plastic Bottle (25 g)"
+      }
+    ]
+  },
+  "data_issues": [
+    {
+      "sku": "ROPTSFLT_PP1_25G",
+      "subcategory": "tea",
+      "type": "malformed_sku",
+      "detail": "Does not match {ABBREV}{FORM}_P{n}_{qty}{UNIT}"
+    },
+    {
+      "sku": "LEMGRST_P1_25G",
+      "subcategory": "tea",
+      "type": "sku_in_title",
+      "detail": "Raw SKU leaked into the product title (Model Name)"
+    },
+    {
+      "sku": "HIBUSFLT_P1_25G",
+      "subcategory": "tea",
+      "type": "sku_in_title",
+      "detail": "Raw SKU leaked into the product title (Model Name)"
+    },
+    {
+      "sku": "SPRMINLVT_P1_25G",
+      "subcategory": "tea",
+      "type": "sku_in_title",
+      "detail": "Raw SKU leaked into the product title (Model Name)"
+    },
+    {
+      "sku": "BS_01_250",
+      "subcategory": "edible_seed",
+      "type": "malformed_sku",
+      "detail": "Does not match {ABBREV}{FORM}_P{n}_{qty}{UNIT}"
+    },
+    {
+      "sku": "WAMESD_P1_ 200G",
+      "subcategory": "edible_seed",
+      "type": "whitespace_in_sku",
+      "detail": "SKU contains a space"
+    },
+    {
+      "sku": "CMOMFLT_P1_25G",
+      "subcategory": "tea",
+      "type": "sku_in_title",
+      "detail": "Raw SKU leaked into the product title (Model Name)"
+    }
+  ],
+  "ui_dropdowns": {
+    "Listing Status": [
+      "ACTIVE",
+      "INACTIVE"
+    ],
+    "Fullfilment by": [
+      "Seller"
+    ],
+    "Procurement type": [
+      "express"
+    ],
+    "Tax Code": [
+      "GST_18",
+      "GST_5"
+    ]
+  },
+  "catalog_templates": {
+    "tea": {
+      "vertical": "tea",
+      "columns": [
+        {
+          "index": 0,
+          "name": "Flipkart Serial Number",
+          "type": "",
+          "example": "",
+          "help": "To be filled by Flipkart"
+        },
+        {
+          "index": 1,
+          "name": "Catalog QC Status",
+          "type": "",
+          "example": "",
+          "help": "To be filled by Flipkart"
+        },
+        {
+          "index": 2,
+          "name": "QC Failed Reason (if any)",
+          "type": "Fast Validate (Press CTRL+SHIFT+S)",
+          "example": "Check summary sheet for more information",
+          "help": "To be filled by Flipkart"
+        },
+        {
+          "index": 3,
+          "name": "Flipkart Product Link",
+          "type": "URL",
+          "example": "http://www.flipkart.com/samsung-galaxy-grand-duos-i9082/p/itmdhdvtaf5uqaaf?pid=MOBDHDVRPR8V85KS&ref=75300de4-ebed-4c82-84c5-19514efb5118",
+          "help": "Please provide the Flipkart.com link for an existing product for faster listing. Also provide the Seller SKU ID in respective column."
+        },
+        {
+          "index": 4,
+          "name": "Product Data Status",
+          "type": "Dropdown",
+          "example": "Approved / Disapproved",
+          "help": "To be filled later - after QC processing."
+        },
+        {
+          "index": 5,
+          "name": "Disapproval Reason (if any)",
+          "type": "Single - Text",
+          "example": "",
+          "help": "To be filled later - after QC processing."
+        },
+        {
+          "index": 6,
+          "name": "Seller SKU ID",
+          "type": "Text -\u00a0limited to 64 characters (including spaces)",
+          "example": "",
+          "help": "Seller SKU ID is the identification number maintained by seller to keep track of SKUs. This will be mapped with Flipkart Serial Number."
+        },
+        {
+          "index": 7,
+          "name": "Group ID",
+          "type": "Single - Text",
+          "example": "Group1",
+          "help": "Group ID refers to a seller given intention to group products of the same design together on product page. For example, group ID will remain the same across size and color variants of a unique design."
+        },
+        {
+          "index": 8,
+          "name": "Parent Variant FSN",
+          "type": "Flipkart Serial Number",
+          "example": "XXXXEA2VVCCXXXXX",
+          "help": "Parent Variant FSN refers to the Flipkart Serial Number of a product already created in your catalog, that you want to group your new products with.  \n\nPlease fill either Parent Variant FSN Parent Varinat FSN if you are adding new products to an existing group or  Group ID if you are creating a new group"
+        },
+        {
+          "index": 10,
+          "name": "Listing Status",
+          "type": "Single - Text",
+          "example": "",
+          "help": "Inactive listings are not available for buyers on Flipkart"
+        },
+        {
+          "index": 11,
+          "name": "MRP (INR)",
+          "type": "Single - Positive_integer",
+          "example": "",
+          "help": "Maximum retail price of the product"
+        },
+        {
+          "index": 12,
+          "name": "Your selling price (INR)",
+          "type": "Single - Positive_integer",
+          "example": "",
+          "help": "Price at which you want to sell this listing"
+        },
+        {
+          "index": 13,
+          "name": "Fullfilment by",
+          "type": "Single - Text",
+          "example": "",
+          "help": "Fullfilment of FA listings will be managed by Flipkart"
+        },
+        {
+          "index": 14,
+          "name": "Procurement type",
+          "type": "Single - Text",
+          "example": "",
+          "help": "Information on how the inventory is procured by the seller to fulfill an order"
+        },
+        {
+          "index": 15,
+          "name": "Procurement SLA (DAY)",
+          "type": "Single - Number",
+          "example": "",
+          "help": "Time required to keep the product ready for dispatch. For Express, SLA value is in Hours and for the others, SLA is in Days"
+        },
+        {
+          "index": 16,
+          "name": "Stock",
+          "type": "Single - Non_negative_integer",
+          "example": "",
+          "help": "The maximum stock quantity you can update is 5000 units per location. For MinOQ listings, the limit is 5000 \u00d7 MinOQ per location."
+        },
+        {
+          "index": 17,
+          "name": "Shipping provider",
+          "type": "Single - Text",
+          "example": "FLIPKART",
+          "help": "Information on who will ship the item to the customer"
+        },
+        {
+          "index": 18,
+          "name": "Local handling fee (INR)",
+          "type": "Single - Non_negative_integer",
+          "example": "",
+          "help": "Handling fee you want charge a buyer in the same city for listings which are not Flipkart Assured"
+        },
+        {
+          "index": 19,
+          "name": "Zonal handling fee (INR)",
+          "type": "Single - Non_negative_integer",
+          "example": "",
+          "help": "Handling fee you want charge a buyer outside your zone for listings which are not Flipkart Assured"
+        },
+        {
+          "index": 20,
+          "name": "National handling fee (INR)",
+          "type": "Single - Non_negative_integer",
+          "example": "",
+          "help": "Handling fee you want charge a buyer outside your zone for listings which are not Flipkart Assured"
+        },
+        {
+          "index": 21,
+          "name": "Length (CM)",
+          "type": "Single - Decimal",
+          "example": "",
+          "help": "Length of the package in cms"
+        },
+        {
+          "index": 22,
+          "name": "Breadth (CM)",
+          "type": "Single - Decimal",
+          "example": "",
+          "help": "Breadth of the package in cms"
+        },
+        {
+          "index": 23,
+          "name": "Height (CM)",
+          "type": "Single - Decimal",
+          "example": "",
+          "help": "Height of the package in cms"
+        },
+        {
+          "index": 24,
+          "name": "Weight (KG)",
+          "type": "Single - Decimal",
+          "example": "",
+          "help": "Weight of the final package in kgs"
+        },
+        {
+          "index": 25,
+          "name": "HSN",
+          "type": "Single - Text",
+          "example": "",
+          "help": "code of your product for determining applicable tax rates"
+        },
+        {
+          "index": 26,
+          "name": "Luxury Cess",
+          "type": "Single - Decimal",
+          "example": "",
+          "help": "Luxury Cess rate if applicable for your listing"
+        },
+        {
+          "index": 27,
+          "name": "Country Of Origin",
+          "type": "Single - Text",
+          "example": "IN for India",
+          "help": "Country of origin or manufacturing or country of assembly in case of imported products"
+        },
+        {
+          "index": 28,
+          "name": "Manufacturer Details",
+          "type": "Single - Long_text",
+          "example": "",
+          "help": "Name and address of the manufacturer"
+        },
+        {
+          "index": 29,
+          "name": "Packer Details",
+          "type": "Single - Long_text",
+          "example": "",
+          "help": "Where manufacturer is not the packer,name and address of packer"
+        },
+        {
+          "index": 30,
+          "name": "Importer Details",
+          "type": "Single - Long_text",
+          "example": "",
+          "help": "Name and address of the importer if the product is being imported"
+        },
+        {
+          "index": 31,
+          "name": "Manufacturing date",
+          "type": "Single - Date",
+          "example": "01/02/2018",
+          "help": "Date (dd/mm/yyyy) on which the product was manufactured or pre packed or imported. For products where day is not available, please put the manufacturing date as 1st of the month. Eg, 01/01/2018 for a product manufactured in Jan 2018."
+        },
+        {
+          "index": 32,
+          "name": "Shelf Life (MONTHS)",
+          "type": "Single - Positive_integer",
+          "example": "",
+          "help": "Duration (in months) from the date of manufacturing beyond which the product shall not have the quality attributes normally expected by the consumers and the commodity should not be regarded as marketable"
+        },
+        {
+          "index": 33,
+          "name": "Tax Code",
+          "type": "Single - Text",
+          "example": "",
+          "help": "Flipkart\u2019s tax code which decides the goods and services tax for the listing"
+        },
+        {
+          "index": 34,
+          "name": "Minimum Order Quantity (MinOQ)",
+          "type": "Single - Positive_integer",
+          "example": "",
+          "help": "Minimum number of units you want customers to buy"
+        },
+        {
+          "index": 35,
+          "name": "Brand",
+          "type": "Single - Text",
+          "example": "",
+          "help": "Brand refers to a type of product manufactured by a company under a particular name."
+        },
+        {
+          "index": 36,
+          "name": "Model Name",
+          "type": "Single - Text",
+          "example": "",
+          "help": "Model Name is the identity of the product that helps in distinguishing it from other products. Possible values are Fresh Brew, Classic, etc."
+        },
+        {
+          "index": 37,
+          "name": "Tea Form",
+          "type": "SINGLE - TEXT",
+          "example": "Powder",
+          "help": "Tea Form refers to the state in which the product comes in."
+        },
+        {
+          "index": 38,
+          "name": "Type",
+          "type": "SINGLE - TEXT",
+          "example": "Green Tea",
+          "help": "Type refers to a category of tea having common characteristics."
+        },
+        {
+          "index": 39,
+          "name": "Ingredients",
+          "type": "Multi - Text",
+          "example": "",
+          "help": "Ingredients refers to the ingredients used in the making of a product. Possible values are Rama Tulsi, Krishna Tulsi, Green Tea, etc."
+        },
+        {
+          "index": 40,
+          "name": "Nutrient Content",
+          "type": "Multi - Text",
+          "example": "",
+          "help": "Nutrient Content refers to a label that gives you information about the nutritional value of a food. Possible values are Vitamin A: 78 mcg, Energy: 814 kcal, etc."
+        },
+        {
+          "index": 41,
+          "name": "Maximum Shelf Life",
+          "type": "Single - Number",
+          "example": "3",
+          "help": "Maximum Shelf Life refers to the time span until which the product is edible for consumption. Possible values 7, 10, etc."
+        },
+        {
+          "index": 42,
+          "name": "Maximum Shelf Life - Measuring Unit",
+          "type": "Single - Text",
+          "example": "[Months]",
+          "help": "Maximum Shelf Life - Measuring Unit refers to the unit used to measure the maximum shelf life of the product. Units should be filled only in singular form."
+        },
+        {
+          "index": 43,
+          "name": "FSSAI Number",
+          "type": "Single - Text",
+          "example": "",
+          "help": "FSSAI Number refers to the license number required to sell food products"
+        },
+        {
+          "index": 44,
+          "name": "Usage Instructions",
+          "type": "Multi - Text",
+          "example": "",
+          "help": "Usage Instructions refers to all the instructions that are specified in order to make the product ready to eat. Possible values are Boil the noodles in hot water, Add cooked vegetables to the noodles, etc."
+        },
+        {
+          "index": 45,
+          "name": "Quantity",
+          "type": "Single - Decimal",
+          "example": "100",
+          "help": "Quantity refers to the volume or amount of product packaged in a given SKU. If there are two tea pack of 30 g each, fill the value as 60 g. Possible values are 100, 3.5, 20, etc."
+        },
+        {
+          "index": 46,
+          "name": "Quantity - Measuring Unit",
+          "type": "Single - Text",
+          "example": "[g]",
+          "help": "Quantity - Measuring Unit refers to the unit used to measure the external identifier. Units should be filled only in singular form."
+        },
+        {
+          "index": 47,
+          "name": "Container Type",
+          "type": "SINGLE - TEXT",
+          "example": "Box",
+          "help": "Container Type refers to the shape of a container that the substance comes in."
+        },
+        {
+          "index": 48,
+          "name": "Pack Of",
+          "type": "Single - Number",
+          "example": "",
+          "help": "Pack of refers to the total number of main products that are included by the brand in the package. For example, if a pack contains 2 water bottles of different colors and capacity, then Pack of will be filled as 2."
+        },
+        {
+          "index": 49,
+          "name": "Main Image URL",
+          "type": "URL",
+          "example": "http://img.fkcdn.com/image/tea/9/7/4/-original-imaenqcyyzdxy823.jpeg",
+          "help": "Image Details - Front View - Front view is a view of the foremost part of a product | Minimum Resolution - 100x500 | Please see the Image Guidelines sheet for more details."
+        },
+        {
+          "index": 50,
+          "name": "Other Image URL 1",
+          "type": "URL",
+          "example": "http://img.fkcdn.com/image/tea/9/7/4/-original-imaenqcyvuntkdxv.jpeg",
+          "help": "Image Details - Veg & Non Veg Mark View - An image of the symbol which indicates whether the product is veg or non veg. | Minimum Resolution - 100x500 | Please see the Image Guidelines sheet for more details."
+        },
+        {
+          "index": 51,
+          "name": "Other Image URL 2",
+          "type": "URL",
+          "example": "http://img.fkcdn.com/image/tea/9/7/4/-original-imaenqcyebyazvhz.jpeg",
+          "help": "Image Details - Fssai View - An image of the license number of the product provided by Food Safety and Standards Authority of India. | Minimum Resolution - 100x500 | Please see the Image Guidelines sheet for more details."
+        },
+        {
+          "index": 52,
+          "name": "Other Image URL 3",
+          "type": "URL",
+          "example": "http://img.fkcdn.com/image/tea/9/7/4/-original-imaenqcyrzbkfgrk.jpeg",
+          "help": "Image Details - Nutritional View - An image of the nutritional information given on the product. | Minimum Resolution - 100x500 | Please see the Image Guidelines sheet for more details."
+        },
+        {
+          "index": 53,
+          "name": "Other Image URL 4",
+          "type": "URL",
+          "example": "http://img.fkcdn.com/image/tea/9/7/4/-original-imaenqcy6wsfgeyj.jpeg",
+          "help": "Image Details - Back View(Without MRP,Mfg Year,Batch no.) - An image of the rear surface of a product without showcasing MRP, Mfg year & batch number. | Minimum Resolution - 100x500 | Please see the Image Guidelines sheet for more details."
+        },
+        {
+          "index": 54,
+          "name": "Other Image URL 5",
+          "type": "URL",
+          "example": "http://img.fkcdn.com/image/tea/9/7/4/-original-imaenqcynrgfbgre.jpeg",
+          "help": "Image Details - Preparation View - An image of the steps involved in preparing the product. | Minimum Resolution - 100x500 | Please see the Image Guidelines sheet for more details."
+        },
+        {
+          "index": 55,
+          "name": "Other Image URL 6",
+          "type": "URL",
+          "example": "http://img.fkcdn.com/image/tea/9/7/4/-original-imaenqcydggfzbsf.jpeg",
+          "help": "Image Details - Lifestyle Image - Usage of a product | Minimum Resolution - 100x500 | Please see the Image Guidelines sheet for more details."
+        },
+        {
+          "index": 56,
+          "name": "Other Image URL 7",
+          "type": "URL",
+          "example": "http://img.fkcdn.com/image/tea/9/7/4/-original-imaenqcyyyum8gsf.jpeg",
+          "help": "Image Details - Pack of View - An image of the total number of units present in the package. | Minimum Resolution - 100x500 | Please see the Image Guidelines sheet for more details."
+        },
+        {
+          "index": 57,
+          "name": "Other Image URL 8",
+          "type": "URL",
+          "example": "http://img.fkcdn.com/image/tea/9/7/4/-original-imaenqcytx8duwy9.jpeg",
+          "help": "Image Details - Side View - A view from the side of a product | Minimum Resolution - 100x500 | Please see the Image Guidelines sheet for more details."
+        },
+        {
+          "index": 58,
+          "name": "Other Image URL 9",
+          "type": "URL",
+          "example": "http://www.company.com/images/SKUID_image.jpeg",
+          "help": "Minimum Resolution - 100x500 | Please see the Image Guidelines sheet for more details."
+        },
+        {
+          "index": 59,
+          "name": "Other Image URL 10",
+          "type": "URL",
+          "example": "http://www.company.com/images/SKUID_image.jpeg",
+          "help": "Minimum Resolution - 100x500 | Please see the Image Guidelines sheet for more details."
+        },
+        {
+          "index": 60,
+          "name": "Other Image URL 11",
+          "type": "URL",
+          "example": "http://www.company.com/images/SKUID_image.jpeg",
+          "help": "Minimum Resolution - 100x500 | Please see the Image Guidelines sheet for more details."
+        },
+        {
+          "index": 61,
+          "name": "Other Image URL 12",
+          "type": "URL",
+          "example": "http://www.company.com/images/SKUID_image.jpeg",
+          "help": "Minimum Resolution - 100x500 | Please see the Image Guidelines sheet for more details."
+        },
+        {
+          "index": 62,
+          "name": "Regional Speciality",
+          "type": "Single - Text",
+          "example": "",
+          "help": "Regional Speciality refers to products which are regional specific. Possible values are Assam, Darjeeling, etc."
+        },
+        {
+          "index": 63,
+          "name": "Organic",
+          "type": "Single - Boolean",
+          "example": "Yes",
+          "help": "Organic refers to whether or not the product is organic in nature. Possible value is Yes or No."
+        },
+        {
+          "index": 64,
+          "name": "Items Included",
+          "type": "Multi - Text",
+          "example": "",
+          "help": "Items Included gives the information of all the contents that are sold in the package. Please specify the package information along with the number of each content mentioned before the name. Data should be double colon (::) separated."
+        },
+        {
+          "index": 65,
+          "name": "Video URL",
+          "type": "Single - Text",
+          "example": "",
+          "help": "Video uploads aren't yet supported on Seller Hub. Please contact Seller Support to add videos to your product listings."
+        },
+        {
+          "index": 66,
+          "name": "Dietary Preference",
+          "type": "SINGLE - TEXT",
+          "example": "Gluten Free::Non GMO",
+          "help": "Dietary Preference refers to the different dietary characteristics present in the food based on preference."
+        },
+        {
+          "index": 67,
+          "name": "Gourmet",
+          "type": "Single - Boolean",
+          "example": "Yes",
+          "help": "Gourmet refers to whether or not the product is a gourmet. Possible value is Yes or No."
+        },
+        {
+          "index": 68,
+          "name": "Caloric Value",
+          "type": "Single - Decimal",
+          "example": "60",
+          "help": "Caloric Value refers to the total number of calories of the product. Possible values are 445, 110, etc."
+        },
+        {
+          "index": 69,
+          "name": "Caloric Value - Measuring Unit",
+          "type": "Single - Text",
+          "example": "[cal]",
+          "help": "Caloric Value - Measuring Unit refers to the unit used to measure the caloric value of the product. Units should be filled only in singular form."
+        },
+        {
+          "index": 70,
+          "name": "No of Servings",
+          "type": "Single - Text",
+          "example": "",
+          "help": "Number of Servings refers to the total quantity of food in the container suitable for or served to one person. Possible values are 30 cups, 50 cups, etc."
+        },
+        {
+          "index": 71,
+          "name": "Additives",
+          "type": "Multi - Text",
+          "example": "",
+          "help": "Additives refers to a substance added to something in small quantities to improve or preserve it. Possible values are Hot Water, Milk, etc."
+        },
+        {
+          "index": 72,
+          "name": "Manufactured By",
+          "type": "Single - Text",
+          "example": "",
+          "help": "Manufactured By refers to the company which manufactures the product. Possible values are Karnataka Aromas, Mittal Group, etc."
+        },
+        {
+          "index": 73,
+          "name": "Model Number",
+          "type": "Single - Text",
+          "example": "",
+          "help": "Model Number refers to the number assigned by the manufacturers to identify the different products that they offer. Possible values are TL44, 3453F, etc."
+        },
+        {
+          "index": 74,
+          "name": "Certification",
+          "type": "Multi - Text",
+          "example": "",
+          "help": "Certification refers to a document prepared by a notified body that describes and validates the authenticity and key characteristics of a product. Possible values are FDA, FCI, etc."
+        },
+        {
+          "index": 75,
+          "name": "Manufacturing Process",
+          "type": "MULTI - TEXT",
+          "example": "",
+          "help": "Manufacturing Process refers to the important steps involved in making the product."
+        },
+        {
+          "index": 76,
+          "name": "Allergens Included",
+          "type": "Single - Boolean",
+          "example": "Yes",
+          "help": "Allergens Included refers to whether or not the product has allergens. Possible value is Yes or No."
+        },
+        {
+          "index": 77,
+          "name": "Fortified",
+          "type": "Single - Boolean",
+          "example": "Yes",
+          "help": "This refers to whether or not the product is fortified. Fortified is defined as the addition of micronutrients to the food. Possible value is Yes or No."
+        },
+        {
+          "index": 78,
+          "name": "Pack of",
+          "type": "Single - Number",
+          "example": "",
+          "help": "Pack of refers to the total number of main products that are included by the brand in the package."
+        },
+        {
+          "index": 79,
+          "name": "Flavor",
+          "type": "MULTI - TEXT",
+          "example": "Plani::Sencha",
+          "help": "Flavor refers to the different types of flavors tea comes in."
+        },
+        {
+          "index": 80,
+          "name": "Height (cm)",
+          "type": "Single - Decimal",
+          "example": "10",
+          "help": "Height refers to the measurement from top to base or head to foot. Please ensure that the values entered are in Centimeters. Possible values are 11, 12, etc."
+        },
+        {
+          "index": 81,
+          "name": "Width (cm)",
+          "type": "Single - Decimal",
+          "example": "13",
+          "help": "Width refers to the breadth, broadness or wideness of a product. Please ensure that the values entered are in Centimeters. Possible values are 13, 14, etc."
+        },
+        {
+          "index": 82,
+          "name": "Depth (cm)",
+          "type": "Single - Decimal",
+          "example": "12",
+          "help": "Depth refers to the distance from the front to the back of the product. Please ensure that the values entered are in Centimeters. Possible values are 12, 13, etc."
+        },
+        {
+          "index": 83,
+          "name": "Weight (kg)",
+          "type": "Single - Decimal",
+          "example": "20",
+          "help": "Weight refers to the weight of the product only, without packaging. Please ensure that the values entered are in Kilograms. Possible values are 15, 18, etc"
+        },
+        {
+          "index": 84,
+          "name": "EAN/UPC",
+          "type": "Multi - Numeric_string",
+          "example": "91200000000",
+          "help": "EAN/UPC- refers to the unique 13 digit code given to each product which is universally recognizable."
+        },
+        {
+          "index": 85,
+          "name": "EAN/UPC - Measuring Unit",
+          "type": "Single - Text",
+          "example": "[EAN]",
+          "help": "EAN/UPC - Measuring Unit refers to the unit used to measure the external identifier. Units should be filled only in singular form. Possible values are EAN, UPC, etc."
+        },
+        {
+          "index": 86,
+          "name": "Description",
+          "type": "Single - Text",
+          "example": "",
+          "help": "Please write few lines describing your product along with a list of products that are compatible with this product. Description is limited to 1000 characters (including spaces). It should not include any hyperlinks, additional offers, or promotion text."
+        },
+        {
+          "index": 87,
+          "name": "Key Features",
+          "type": "Multi - Text",
+          "example": "",
+          "help": "Key Features refers to the defining features of a product that can be highlighted on the website."
+        },
+        {
+          "index": 88,
+          "name": "Search Keywords",
+          "type": "Multi - Text",
+          "example": "Red Casual Tshirt for Women::Black Mens Tshirt::Printed Tshirt",
+          "help": "Search Keywords refers to the words which the customer might use to find a product. These keywords are tagged to the product and when the buyer searches with the appropriate search word(s), the nearest appropriate product is retrieved and displayed on Flipkart website. The search output is also based on multiple other factors such as Product Quality, Pricing, etc. Please enter a maximum of 5 keywords for this purpose."
+        },
+        {
+          "index": 89,
+          "name": "Key Spec 1",
+          "type": "Multi - Text",
+          "example": "",
+          "help": "Key Spec can list an important specification of the product, which will be helpful to the customer. This will show below the Title on the Website. The data entered here should be less than 22 characters (including spaces)."
+        },
+        {
+          "index": 90,
+          "name": "Key Spec 2",
+          "type": "Multi - Text",
+          "example": "",
+          "help": "Key Spec can list an important specification of the product, which will be helpful to the customer. This will show below the Title on the Website. The data entered here should be less than 22 characters (including spaces)."
+        },
+        {
+          "index": 91,
+          "name": "Key Spec 3",
+          "type": "Multi - Text",
+          "example": "",
+          "help": "Key Spec can list an important specification of the product, which will be helpful to the customer. This will show below the Title on the Website. The data entered here should be less than 22 characters (including spaces)."
+        },
+        {
+          "index": 92,
+          "name": "Key Spec 4",
+          "type": "Multi - Text",
+          "example": "",
+          "help": "Key Spec can list an important specification of the product, which will be helpful to the customer. This will show below the Title on the Website. The data entered here should be less than 22 characters (including spaces)."
+        },
+        {
+          "index": 93,
+          "name": "Set of",
+          "type": "Single - Number",
+          "example": "",
+          "help": "Set of refers to the total number of boxes that are included by the brand in the package. If a product contains 2 boxes of 10 product each, please fill the attribute 'Set of' as 'Set of 2'."
+        },
+        {
+          "index": 94,
+          "name": "Other Features",
+          "type": "Multi - Text",
+          "example": "",
+          "help": "Other Features refers to any additional information on the features of the product that would be useful to a customer."
+        },
+        {
+          "index": 95,
+          "name": "Other Dimensions",
+          "type": "Multi - Text",
+          "example": "",
+          "help": "Other Dimensions refers to any additional information on the dimensions of the product that would be useful to a customer."
+        }
+      ],
+      "dropdowns": {
+        "Country Of Origin": [
+          "India",
+          "Afghanistan",
+          "Aland Islands",
+          "Albania",
+          "Algeria",
+          "American Samoa",
+          "Andorra",
+          "Angola",
+          "Anguilla",
+          "Antarctica",
+          "Antigua and Barbuda",
+          "Argentina",
+          "Armenia",
+          "Aruba",
+          "Australia",
+          "Austria",
+          "Azerbaijan",
+          "Bahamas",
+          "Bahrain",
+          "Bangladesh",
+          "Barbados",
+          "Belarus",
+          "Belgium",
+          "Belize",
+          "Benin",
+          "Bermuda",
+          "Bhutan",
+          "Bolivia",
+          "Bosnia and Herzegovina",
+          "Botswana",
+          "Bouvet Island",
+          "Brazil",
+          "British Indian Ocean Territory",
+          "British Virgin Islands",
+          "Brunei Darussalam",
+          "Bulgaria",
+          "Burkina Faso",
+          "Burundi",
+          "Cambodia",
+          "Cameroon",
+          "Canada",
+          "Cape Verde",
+          "Cayman Islands",
+          "Central African Republic",
+          "Chad",
+          "Chile",
+          "China",
+          "Christmas Island",
+          "Cocos (Keeling) Islands",
+          "Colombia",
+          "Comoros",
+          "Congo (Brazzaville)",
+          "Congo, (Kinshasa)",
+          "Cook Islands",
+          "Costa Rica",
+          "Croatia",
+          "Cuba",
+          "Cyprus",
+          "Czech Republic",
+          "C\u00f4te d'Ivoire",
+          "Denmark",
+          "Djibouti",
+          "Dominica",
+          "Dominican Republic",
+          "Ecuador",
+          "Egypt",
+          "El Salvador",
+          "Equatorial Guinea",
+          "Eritrea",
+          "Estonia",
+          "Ethiopia",
+          "Falkland Islands (Malvinas)",
+          "Faroe Islands",
+          "Fiji",
+          "Finland",
+          "France",
+          "French Guiana",
+          "French Polynesia",
+          "French Southern Territories",
+          "Gabon",
+          "Gambia",
+          "Georgia",
+          "Germany",
+          "Ghana",
+          "Gibraltar",
+          "Greece",
+          "Greenland",
+          "Grenada",
+          "Guadeloupe",
+          "Guam",
+          "Guatemala",
+          "Guernsey",
+          "Guinea",
+          "Guinea-Bissau",
+          "Guyana",
+          "Haiti",
+          "Heard and Mcdonald Islands",
+          "Holy See (Vatican City State)",
+          "Honduras",
+          "Hong Kong, SAR China",
+          "Hungary",
+          "Iceland",
+          "Indonesia",
+          "Iran",
+          "Iraq",
+          "Ireland",
+          "Isle of Man",
+          "Israel",
+          "Italy",
+          "Jamaica",
+          "Japan",
+          "Jersey",
+          "Jordan",
+          "Kazakhstan",
+          "Kenya",
+          "Kiribati",
+          "Korea (North)",
+          "Korea (South)",
+          "Kuwait",
+          "Kyrgyzstan",
+          "Lao PDR",
+          "Latvia",
+          "Lebanon",
+          "Lesotho",
+          "Liberia",
+          "Libya",
+          "Liechtenstein",
+          "Lithuania",
+          "Luxembourg",
+          "Macao, SAR China",
+          "Macedonia",
+          "Madagascar",
+          "Malawi",
+          "Malaysia",
+          "Maldives",
+          "Mali",
+          "Malta",
+          "Marshall Islands",
+          "Martinique",
+          "Mauritania",
+          "Mauritius",
+          "Mayotte",
+          "Mexico",
+          "Micronesia",
+          "Moldova",
+          "Monaco",
+          "Mongolia",
+          "Montenegro",
+          "Montserrat",
+          "Morocco",
+          "Mozambique",
+          "Myanmar",
+          "Namibia",
+          "Nauru",
+          "Nepal",
+          "Netherlands",
+          "Netherlands Antilles",
+          "New Caledonia",
+          "New Zealand",
+          "Nicaragua",
+          "Niger",
+          "Nigeria",
+          "Niue",
+          "Norfolk Island",
+          "Northern Mariana Islands",
+          "Norway",
+          "Oman",
+          "Pakistan",
+          "Palau",
+          "Palestinian Territory",
+          "Panama",
+          "Papua New Guinea",
+          "Paraguay",
+          "Peru",
+          "Philippines",
+          "Pitcairn",
+          "Poland",
+          "Portugal",
+          "Puerto Rico",
+          "Qatar",
+          "Romania",
+          "Russian Federation",
+          "Rwanda",
+          "R\u00e9union",
+          "Saint Helena",
+          "Saint Kitts and Nevis",
+          "Saint Lucia",
+          "Saint Pierre and Miquelon",
+          "Saint Vincent and Grenadines",
+          "Saint-Barth\u00e9lemy",
+          "Saint-Martin (French part)",
+          "Samoa",
+          "San Marino",
+          "Sao Tome and Principe",
+          "Saudi Arabia",
+          "Senegal",
+          "Serbia",
+          "Seychelles",
+          "Sierra Leone",
+          "Singapore",
+          "Slovakia",
+          "Slovenia",
+          "Solomon Islands",
+          "Somalia",
+          "South Africa",
+          "South Georgia and the South Sandwich Islands",
+          "South Sudan",
+          "Spain",
+          "Sri Lanka",
+          "Sudan",
+          "Suriname",
+          "Svalbard and Jan Mayen Islands",
+          "Swaziland",
+          "Sweden",
+          "Switzerland",
+          "Syrian Arab Republic (Syria)",
+          "Taiwan",
+          "Tajikistan",
+          "Tanzania",
+          "Thailand",
+          "Timor-Leste",
+          "Togo",
+          "Tokelau",
+          "Tonga",
+          "Trinidad and Tobago",
+          "Tunisia",
+          "Turkey",
+          "Turkmenistan",
+          "Turks and Caicos Islands",
+          "Tuvalu",
+          "US Minor Outlying Islands",
+          "Uganda",
+          "Ukraine",
+          "United Arab Emirates",
+          "United Kingdom",
+          "United States of America",
+          "Uruguay",
+          "Uzbekistan",
+          "Vanuatu",
+          "Venezuela (Bolivarian Republic)",
+          "Viet Nam",
+          "Virgin Islands, US",
+          "Wallis and Futuna Islands",
+          "Western Sahara",
+          "Yemen",
+          "Zambia",
+          "Zimbabwe"
+        ],
+        "Tax Code": [
+          "GST_0",
+          "GST_0.25",
+          "GST_18",
+          "GST_3",
+          "GST_40",
+          "GST_5",
+          "GST_APPAREL",
+          "GST_Footwear",
+          "GST_Old_12_New_0",
+          "GST_Old_12_New_5",
+          "GST_Old_12_new_18",
+          "GST_Old_18_New_0",
+          "GST_Old_18_New_40",
+          "GST_Old_18_New_5",
+          "GST_Old_28_New_18",
+          "GST_Old_28_New_40",
+          "GST_Old_28_New_5",
+          "GST_Old_5_New_0",
+          "GST_Old_5_New_18"
+        ],
+        "Type": [
+          "Black Tea",
+          "Blooming Tea",
+          "Blue Tea",
+          "Fizzy Tea",
+          "Flavored Tea",
+          "Green Tea",
+          "Herbal Infusion Tea",
+          "Herbal Tea",
+          "Iced Tea",
+          "Infusion Tea",
+          "Instant Tea",
+          "Jasmine Tea",
+          "Masala Tea",
+          "Matcha Tea",
+          "Mate Tea",
+          "Oolong Tea",
+          "Pu-erh Tea",
+          "Regular Tea",
+          "Rooibos Tea",
+          "Tea Blend",
+          "White Tea",
+          "Yellow Tea"
+        ],
+        "Tea Form": [
+          "Capsule",
+          "Granules",
+          "Leaves",
+          "Leaves & Granules",
+          "Liquid",
+          "Powder",
+          "Pyramid Tea Bag",
+          "Roasted",
+          "Tablet",
+          "Tea Bag"
+        ],
+        "Container Type": [
+          "Box",
+          "Drum",
+          "Festive Gift Box",
+          "Glass Bottle",
+          "Mason Jar",
+          "Plastic Bottle",
+          "Pouch",
+          "Tetrapack",
+          "Tin",
+          "Tray",
+          "Vacuum Pack"
+        ],
+        "Dietary Preference": [
+          "Dairy Free",
+          "Gluten Free",
+          "Low Cholesterol",
+          "Low Sodium",
+          "No Cholesterol",
+          "No MSG",
+          "No Sodium",
+          "No Trans Fat",
+          "Non GMO",
+          "Sugar Free",
+          "Wheat Free"
+        ],
+        "Manufacturing Process": [
+          "NA",
+          "Vegan"
+        ],
+        "Flavor": [
+          "Abali",
+          "Almond",
+          "Aloe Vera",
+          "Amla",
+          "Apple",
+          "Ashwagandha",
+          "Assorted",
+          "Banana",
+          "Bergamot Orange",
+          "Berry",
+          "Black Pepper",
+          "Blackcurrant",
+          "Blueberry",
+          "Brahmi",
+          "Cardamom",
+          "Ceylon",
+          "Chamomile",
+          "Cherry",
+          "Choco",
+          "Chocolate",
+          "Cinnamon",
+          "Citrus",
+          "Cloves",
+          "Coconut",
+          "Cranberry",
+          "Fennel",
+          "Garcinia",
+          "Ginger",
+          "Ginseng",
+          "Grape",
+          "Green Apple",
+          "Guava",
+          "Herbs",
+          "Hibiscus",
+          "Honey",
+          "Jasmine",
+          "Kiwi",
+          "Lavender",
+          "Lemon",
+          "Lemon Ajwain",
+          "Lemon Grass",
+          "Lime",
+          "Lime Flower",
+          "Liquorice",
+          "Longan",
+          "Mango",
+          "Marigold",
+          "Mint",
+          "Mixed Fruit",
+          "Mulethi",
+          "Orange",
+          "Papaya",
+          "Passion Fruit",
+          "Peach",
+          "Peppermint",
+          "Pineapple",
+          "Plain",
+          "Pomegranate",
+          "Psyllium Husk",
+          "Raspberry",
+          "Rose",
+          "Saffron",
+          "Sencha",
+          "Senna",
+          "Spices",
+          "Strawberry",
+          "Tulsi",
+          "Turmeric",
+          "Unflavoured",
+          "Vanilla"
+        ]
+      },
+      "matching_attributes": [
+        "Tea Form",
+        "Model Name",
+        "Dietary Preference",
+        "Video URL",
+        "FSSAI Number",
+        "Certification",
+        "Usage Instructions",
+        "Model Number",
+        "Allergens Included",
+        "Caloric Value",
+        "Manufacturing Process",
+        "Maximum Shelf Life",
+        "Brand",
+        "Ingredients",
+        "Gourmet",
+        "Nutrient Content",
+        "Manufactured By",
+        "Pack of",
+        "No of Servings",
+        "Organic",
+        "Fortified",
+        "Type",
+        "Regional Speciality",
+        "Additives",
+        "Items Included"
+      ],
+      "variant_attributes": [
+        "Pack Of",
+        "Container Type",
+        "Quantity"
+      ]
+    }
+  }
+}

@@ -1,0 +1,74 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Listing Assistant</title>
+<link rel="stylesheet" href="panel.css">
+<div id="app">
+  <header>
+    <h1>Listing Assistant</h1>
+    <button id="settingsBtn" class="icon" title="Settings">⚙</button>
+  </header>
+
+  <section id="settings" hidden>
+    <label>Gemini API key
+      <input id="apiKey" type="password" placeholder="AIza…" autocomplete="off">
+    </label>
+    <label>Model
+      <select id="model"><option value="" disabled selected>— click Load models —</option></select>
+    </label>
+    <div class="row">
+      <button id="loadModels" class="secondary">Load models</button>
+      <button id="saveSettings">Save</button>
+    </div>
+    <p class="hint">Stored in this browser only (<code>chrome.storage.local</code>).
+      Never sent to Flipkart.</p>
+  </section>
+
+  <section id="warn" class="warn" hidden></section>
+
+  <ol class="steps">
+    <li>
+      <h2>1 · Category</h2>
+      <select id="category"></select>
+      <p class="hint" id="catHint"></p>
+    </li>
+
+    <li>
+      <h2>2 · Label photos</h2>
+      <input id="files" type="file" accept="image/*" multiple>
+      <div id="thumbs" class="thumbs"></div>
+      <p class="hint">Front, back, nutrition panel and FSSAI number read best.
+        These go to Gemini; nothing else does.</p>
+    </li>
+
+    <li>
+      <h2>3 · Scan the open form</h2>
+      <div class="row">
+        <button id="scan" class="secondary">Scan form fields</button>
+        <button id="dump" class="secondary" title="Copies the form's HTML so it can be debugged">Copy form HTML</button>
+      </div>
+      <p class="hint" id="scanHint">Open the listing form in the Seller Hub tab, and make sure that tab is the active one.</p>
+      <div id="scanned" class="scanned" hidden></div>
+    </li>
+
+    <li>
+      <h2>4 · Draft the fields</h2>
+      <div class="row">
+        <button id="analyse" disabled>Analyse photos</button>
+        <button id="cancelAnalyse" class="secondary" hidden>Cancel</button>
+      </div>
+      <p class="hint" id="analyseHint"></p>
+    </li>
+  </ol>
+
+  <section id="results" hidden>
+    <div class="row spread">
+      <h2>Review &amp; insert</h2>
+      <button id="copyRow" class="secondary" title="Tab-separated, for the bulk catalogue sheet">Copy as row</button>
+    </div>
+    <p class="hint">Nothing is submitted. You still click <b>Send to QC</b> yourself.</p>
+    <div id="fields"></div>
+  </section>
+
+  <footer id="status"></footer>
+</div>
+<script type="module" src="panel.js"></script>
