@@ -1,9 +1,13 @@
 import { listModels, extract, fileToInlineData } from '../lib/gemini.js';
+import { FIRST_OPTION, normaliseDraftValue, resolveHouseDefault }
+  from '../lib/platform.mjs';
 
 const $ = (id) => document.getElementById(id);
+const esc = (value) => String(value).replace(/[&<>"']/g, (char) =>
+  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
 const state = {
   seed: null, images: [], formLabels: [], formFields: [], drafted: [],
-  busy: false, abortController: null,
+  busy: false, abortController: null, platform: 'flipkart',
 };
 
 const setStatus = (t) => { $('status').textContent = t || ''; };
@@ -63,7 +67,7 @@ async function loadSeed() {
   state.seed = await (await fetch(chrome.runtime.getURL('seed/patterns.json'))).json();
   const cats = Object.keys(state.seed.categories);
   $('category').innerHTML =
-    '<option value="" disabled selected>— select the Seller Hub category —</option>' +
+    '<option value="" disabled selected>— select the product category —</option>' +
     cats.map((c) => `<option value="${c}">${c}</option>`).join('') +
     '<option value="__other__">other / new category — no defaults</option>';
   showCatHint();
@@ -78,7 +82,7 @@ async function loadSeed() {
 function showCatHint() {
   const key = $('category').value;
   if (!key) {
-    $('catHint').textContent = 'Choose the category shown under Select Vertical in Seller Hub.';
+    $('catHint').textContent = 'Choose the matching product category used by the marketplace.';
     return;
   }
   if (key === '__other__') {
@@ -119,6 +123,7 @@ $('scan').onclick = async () => {
   setStatus('Scanning the form…');
   const r = await toPage({ action: 'SCAN' });
   if (!r.ok) { $('scanHint').textContent = r.error; return setStatus(''); }
+  state.platform = r.platform || 'flipkart';
   if (r.vertical && state.seed.categories[r.vertical]) {
     $('category').value = r.vertical;
     showCatHint();
@@ -127,7 +132,12 @@ $('scan').onclick = async () => {
   // the ambiguity rather than guessing which box to write into.
   state.formFields = r.fields || [];
   state.formLabels = state.formFields.map((f) => f.label);
+  if (!r.vertical && state.platform === 'meesho' && !$('category').value) {
+    $('category').value = '__other__';
+    showCatHint();
+  }
   const drops = state.formFields.filter((f) => f.kind === 'dropdown').length;
+  const options = state.formFields.reduce((n, f) => n + (f.options?.length || 0), 0);
   const units = state.formFields.filter((f) => / unit$/i.test(f.label)).length;
   $('scanHint').textContent =
     `${state.formFields.length - units} labelled fields` +
@@ -135,7 +145,12 @@ $('scan').onclick = async () => {
     `from ${r.total} controls` +
     (r.duplicates ? `; ${r.duplicates} duplicate control(s) ignored` : '') +
     (r.unlabelled ? `; ${r.unlabelled} unlabelled control(s) ignored` : '') +
-    '. Switch tabs in Seller Hub and rescan to cover the rest.';
+    (state.platform === 'meesho'
+      ? `. Meesho form detected; ${options} live dropdown option(s) read.`
+      : '. Switch tabs in Seller Hub and rescan to cover the rest.');
+  $('submitHint').innerHTML = state.platform === 'meesho'
+    ? 'Nothing is submitted. You still click <b>Submit Catalog</b> yourself.'
+    : 'Nothing is submitted. You still click <b>Send to QC</b> yourself.';
   renderScanned();
   refreshAnalyse();
   setStatus('');
@@ -159,7 +174,7 @@ function refreshAnalyse() {
   $('cancelAnalyse').hidden = !state.busy;
   $('cancelAnalyse').disabled = !state.busy;
   $('analyseHint').textContent = !category
-    ? 'Select the matching Seller Hub category first.'
+    ? 'Select the matching product category first.'
     : state.formLabels.length
     ? (state.images.length ? '' : 'Add at least one label photo.')
     : 'Scan the form first.';
@@ -172,8 +187,10 @@ function renderScanned() {
   box.innerHTML =
     '<b>Fields found on this tab</b><ul>' +
     state.formFields.map((f) =>
-      `<li><code>${f.label}</code> <span class="badge">${f.kind}</span>` +
-      (f.count > 1 ? ` <span class="badge low">x${f.count}</span>` : '') + '</li>').join('') +
+      `<li><code>${esc(f.label)}</code> <span class="badge">${esc(f.kind)}</span>` +
+      (f.count > 1 ? ` <span class="badge low">x${f.count}</span>` : '') +
+      (f.options?.length ? `<div class="options">${f.options.map(esc).join(' | ')}</div>` : '') +
+      '</li>').join('') +
     '</ul>';
 }
 
@@ -182,6 +199,8 @@ const nkey = (s) => String(s || '').replace(/[*]/g, '').replace(/\s+/g, ' ').tri
 
 function allowedFor(label) {
   const want = nkey(label);
+  const live = state.formFields.find((field) => nkey(field.label) === want)?.options;
+  if (live?.length) return live;
   const pools = [state.seed.ui_dropdowns || {}];
   for (const t of Object.values(state.seed.catalog_templates || {})) pools.push(t.dropdowns || {});
   for (const pool of pools) {
@@ -195,11 +214,13 @@ function allowedFor(label) {
 /* ---------- prompt ----------------------------------------------------- */
 function buildPrompt(cat) {
   const known = cat !== '__other__';
+  const meesho = state.platform === 'meesho';
+  const marketplace = meesho ? 'Meesho Supplier Panel' : 'Flipkart Seller Hub';
   const c = known ? state.seed.categories[cat] : { defaults: {} };
   const ex = known ? (state.seed.title_examples[cat] || []).slice(0, 6)
                    : Object.values(state.seed.title_examples).flat().slice(0, 6);
   const skuExamples = known ? (state.seed.sku_examples?.[cat] || []).slice(0, 20) : [];
-  return `You are filling a Flipkart Seller Hub listing form for an Indian seller.
+  return `You are filling a ${marketplace} listing form for an Indian seller.
 
 Read the attached product-label photographs and produce values for the form fields listed below.
 
@@ -215,12 +236,12 @@ RULES
 - For Nutrient Content, inspect the nutrition panel carefully and return every
   legible "name: value" item separated by ::. Do not omit it when the panel is
   readable, and do not invent values that are not visible.
-- Quantity is the total net quantity printed on the pack and must contain only
-  the number. Put its unit in the separate Quantity unit dropdown.
-- Maximum Shelf Life must contain only the number. Put Months/Days in its
-  separate unit dropdown.
-- Weight fields use kilograms. Convert label grams to kilograms (for example,
-  400 g becomes 0.4), and return only the number. Dimensions use centimetres.
+- ${meesho
+  ? 'Net Quantity (N) is the number of saleable items in the pack. Shelf life (Best Before) must include the period and unit, such as "24 Months".'
+  : 'Quantity is the total net quantity printed on the pack and must contain only the number; put its unit in the separate Quantity unit dropdown. Maximum Shelf Life must contain only the number; put Months/Days in its separate unit dropdown.'}
+- ${meesho
+  ? 'Net Weight (gms) uses grams. Convert kilograms to grams and return only the number.'
+  : 'Weight fields use kilograms. Convert label grams to kilograms (for example, 400 g becomes 0.4), and return only the number. Dimensions use centimetres.'}
 - Always return usage_instructions separately. Copy the label instruction when
   present; otherwise write one short, conservative instruction appropriate to
   the actual product shown in the photos. Never return "none".
@@ -230,9 +251,15 @@ RULES
   certifications and regulated claims that are not visible on the label.
 - Do not put the SKU code inside any title or name field.
 - Brand is exactly "Promishor". Never append product words to the brand.
-- Always generate Seller SKU ID when that field is listed. Reuse an existing
+- Always generate Seller SKU ID or Style code/Product ID when that field is listed. Reuse an existing
   abbreviation for the same product; otherwise coin one uppercase abbreviation
   from the product name and follow the SKU convention exactly.
+- ${meesho
+  ? 'For Manufacturer, Packer and Importer fields, copy each name, address and pincode exactly from the label. Use the house name only when the matching name field is not legible; never invent an address or pincode.'
+  : 'Keep manufacturer, packer and importer details exactly as printed on the label.'}
+- ${meesho
+  ? 'GST and HSN Code are regulated values. Use the supplied house default only for the matching known category; otherwise omit them rather than guessing.'
+  : 'Use the Flipkart category defaults when the label does not contradict them.'}
 - Reply only with fields you can actually determine.
 
 FORM FIELDS TO FILL (use these labels verbatim, one entry each):
@@ -257,8 +284,8 @@ ${JSON.stringify(skuExamples, null, 0).slice(0, 2200)}
 ${known
   ? `HOUSE DEFAULTS for category "${cat}" (use unless the label clearly disagrees):
 ${JSON.stringify(c.defaults, null, 1)}`
-  : `This is a NEW category with no house defaults. Do not guess HSN codes, tax
-codes or package dimensions - omit those fields and let the seller set them.`}
+  : `This is a NEW category with no house defaults. Do not guess HSN codes, GST,
+tax codes or package dimensions - omit those fields and let the seller set them.`}
 
 EXAMPLE TITLES from this seller's existing catalogue:
 ${ex.map((e) => `- ${e.sku}: ${e.title}`).join('\n')}
@@ -302,24 +329,25 @@ const SCHEMA = {
 // cannot omit a known value from an otherwise good photo extraction.
 const DEFAULT_LABELS = {
   mrp: ['mrp'],
-  selling_price: ['your selling price'],
+  selling_price: ['your selling price', 'meesho price'],
   fulfilment_by: ['fulfilment by', 'fulfillment by', 'fullfilment by'],
   procurement_sla: ['procurement sla'],
   procurement_type: ['procurement type'],
   length_cm: ['length'],
   breadth_cm: ['breadth'],
   height_cm: ['height'],
-  weight_kg: ['weight'],
+  weight_kg: ['weight', 'net weight (gms)'],
   local_fee: ['local handling fee'],
   zonal_fee: ['zonal handling fee'],
   national_fee: ['national handling fee'],
-  hsn: ['hsn'],
-  tax_code: ['tax code'],
+  hsn: ['hsn', 'hsn code'],
+  tax_code: ['tax code', 'gst'],
   country_of_origin: ['country of origin'],
-  manufacturer_details: ['manufacturer details'],
-  packer_details: ['packer details'],
-  shelf_life_months: ['shelf life'],
-  stock: ['stock'],
+  manufacturer_details: ['manufacturer details', 'manufacturer name'],
+  packer_details: ['packer details', 'packer name'],
+  importer_details: ['importer details', 'importer name'],
+  shelf_life_months: ['shelf life', 'shelf life (best before)'],
+  stock: ['stock', 'inventory'],
   minimum_order_quantity: ['minimum order quantity (minoq)'],
   shipping_provider: ['shipping provider'],
   luxury_cess: ['luxury cess'],
@@ -331,6 +359,7 @@ const DEFAULT_LABELS = {
   pack_of: ['pack of'],
   maximum_shelf_life: ['maximum shelf life'],
   maximum_shelf_life_unit: ['maximum shelf life unit'],
+  brand: ['brand'],
 };
 
 const REQUESTED_DEFAULTS = {
@@ -338,6 +367,7 @@ const REQUESTED_DEFAULTS = {
   minimum_order_quantity: '1',
   shipping_provider: 'Flipkart',
   luxury_cess: '0',
+  brand: 'Promishor',
 };
 
 // All five prior Tea listings are 25 g, pack 1, Herbal Tea with 24 months'
@@ -359,21 +389,24 @@ const PRODUCT_DEFAULTS = {
 const SKU_RX = /^[A-Z]{2,15}_P[1-9]\d*_[1-9]\d*(?:G|KG|ML|L)$/;
 
 function addGeneratedSku(drafted, value) {
-  const field = state.formFields.find((f) => nkey(f.label) === 'seller sku id');
+  const fields = state.formFields.filter((f) => nkey(f.label) === 'seller sku id' ||
+    /^style code\/? product id/.test(nkey(f.label)) || /^sku id/.test(nkey(f.label)));
   const raw = String(value || '').trim().toUpperCase().replace(/\s+/g, '');
   const parts = raw.match(/P([1-9]\d*)[_-]([1-9]\d*)(KG|ML|G|L)$/);
   const prefix = parts ? raw.slice(0, parts.index).replace(/[^A-Z]/g, '') : '';
   const sku = parts && prefix.length >= 2 && prefix.length <= 15
     ? `${prefix}_P${parts[1]}_${parts[2]}${parts[3]}` : raw;
-  if (!field || !SKU_RX.test(sku)) return drafted;
-  const existing = drafted.find((f) => !f.otherTab && nkey(f.label) === 'seller sku id');
-  if (existing) {
-    existing.value = sku;
-    existing.confidence = 'medium';
-    existing.source = 'generated from label and prior SKU format';
-  } else {
-    drafted.push({ label: field.label, value: sku, confidence: 'medium',
-      source: 'generated from label and prior SKU format' });
+  if (!fields.length || !SKU_RX.test(sku)) return drafted;
+  for (const field of fields) {
+    const existing = drafted.find((f) => !f.otherTab && nkey(f.label) === nkey(field.label));
+    if (existing) {
+      existing.value = sku;
+      existing.confidence = 'medium';
+      existing.source = 'generated from label and prior SKU format';
+    } else {
+      drafted.push({ label: field.label, value: sku, confidence: 'medium',
+        source: 'generated from label and prior SKU format' });
+    }
   }
   return drafted;
 }
@@ -392,16 +425,6 @@ function addUsageInstructions(drafted, value) {
   return drafted;
 }
 
-function normaliseDraftValue(field) {
-  if (nkey(field.label) !== 'weight') return field;
-  const match = String(field.value).trim().match(/^(\d+(?:\.\d+)?)\s*(g|kg)?$/i);
-  if (!match) return field;
-  const amount = Number(match[1]);
-  if (match[2]?.toLowerCase() !== 'g' && amount < 50) return field;
-  return { ...field, value: String(amount / 1000), confidence: 'medium',
-    source: `${field.source}; converted grams to kg` };
-}
-
 function addMissingDefaults(drafted, category) {
   const categoryDefaults = state.seed.categories[category]?.defaults || {};
   const productDefaults = PRODUCT_DEFAULTS[category] || {};
@@ -413,15 +436,35 @@ function addMissingDefaults(drafted, category) {
     const field = state.formFields.find((f) => aliases.includes(nkey(f.label)));
     if (!field) continue;
     const existing = drafted.find((f) => !f.otherTab && nkey(f.label) === nkey(field.label));
+    let resolved = resolveHouseDefault(state.platform, key, value);
+    const current = String(field.current || '').trim();
+    if (!existing && field.kind === 'dropdown' &&
+        !/^select(?: one)?$|^\d+ selected$/i.test(current)) {
+      drafted.push({ label: field.label, value: current, confidence: 'high',
+        source: 'already selected in the open form' });
+      present.add(nkey(field.label));
+      continue;
+    }
+    const allowed = field.kind === 'dropdown' ? allowedFor(field.label) : null;
+    if (allowed?.length) {
+      const exact = allowed.find((option) => nkey(option) === nkey(resolved));
+      const prefix = allowed.filter((option) => nkey(option).startsWith(nkey(resolved)));
+      if (exact) resolved = exact;
+      else if (prefix.length === 1) resolved = prefix[0];
+      else if (state.platform === 'meesho' && ['hsn', 'tax_code'].includes(key)) continue;
+    }
     if (existing && key in REQUESTED_DEFAULTS) {
-      existing.value = String(value);
+      existing.value = resolved;
       existing.confidence = 'medium';
       existing.source = 'requested default';
       continue;
     }
     if (present.has(nkey(field.label))) continue;
-    drafted.push({ label: field.label, value: String(value), confidence: 'medium',
-      source: key in REQUESTED_DEFAULTS ? 'requested default' :
+    const crossMarketTax = state.platform === 'meesho' && ['hsn', 'tax_code'].includes(key);
+    drafted.push({ label: field.label, value: resolved,
+      confidence: crossMarketTax ? 'low' : 'medium',
+      source: crossMarketTax ? 'cross-market category default — review' :
+        key in REQUESTED_DEFAULTS ? 'requested default' :
         key in productDefaults ? 'previous listing default' : 'house default' });
     present.add(nkey(field.label));
   }
@@ -434,12 +477,15 @@ function addFirstDropdownDefaults(drafted) {
     if (field.kind !== 'dropdown' || present.has(nkey(field.label))) continue;
     const current = String(field.current || '').trim();
     const allowed = allowedFor(field.label) || [];
-    const value = allowed.find((option) => nkey(current).includes(nkey(option))) ||
-      allowed.find((option) => !/^select(?: one)?$/i.test(option.trim())) ||
+    const regulated = new Set(['gst', 'hsn code']);
+    const selected = allowed.find((option) => nkey(current).includes(nkey(option))) ||
       (!/^select(?: one)?$|^\d+ selected$/i.test(current) ? current : '');
+    const value = selected || (!regulated.has(nkey(field.label)) &&
+      (allowed.find((option) => !/^select(?: one)?$/i.test(option.trim())) ||
+       (state.platform === 'meesho' ? FIRST_OPTION : '')));
     if (!value) continue;
     drafted.push({ label: field.label, value, confidence: 'low',
-      source: 'first allowed option — review' });
+      source: value === FIRST_OPTION ? 'first available option — review' : 'first allowed option — review' });
     present.add(nkey(field.label));
   }
   return drafted;
@@ -494,11 +540,16 @@ $('analyse').onclick = async () => {
       apiKey, model, images, schema: SCHEMA, prompt: buildPrompt(category),
       signal: state.abortController.signal,
     });
-    state.drafted = addFirstDropdownDefaults(addMissingDefaults(addUsageInstructions(addGeneratedSku((out.fields || []).map((f) => {
+    let drafted = (out.fields || []).filter((f) => String(f.value || '').trim()).map((f) => {
       const s2 = snapLabel(f.label);
       if (s2.missing) return { ...f, otherTab: true };
-      return normaliseDraftValue({ ...f, label: s2.label, snappedFrom: s2.snapped });
-    }), out.seller_sku_id), out.usage_instructions), category));
+      return normaliseDraftValue(state.platform,
+        { ...f, label: s2.label, snappedFrom: s2.snapped });
+    });
+    drafted = addGeneratedSku(drafted, out.seller_sku_id);
+    drafted = addUsageInstructions(drafted, out.usage_instructions);
+    drafted = addMissingDefaults(drafted, category);
+    state.drafted = addFirstDropdownDefaults(drafted);
     const here = state.drafted.filter((f) => !f.otherTab).length;
     const omitted = Math.max(0, state.formFields.length - here);
     render();
@@ -550,7 +601,7 @@ function render() {
       </div>
       <div class="msg"></div>`;
     el.querySelector('.lbl').textContent = f.label;
-    el.querySelector('.val').value = f.value;
+    el.querySelector('.val').value = f.value === FIRST_OPTION ? 'First available option' : f.value;
     el.querySelector('.src').textContent = f.source;
     const note = el.querySelector('.snapnote');
     if (f.otherTab) {
@@ -564,7 +615,10 @@ function render() {
       await navigator.clipboard.writeText(el.querySelector('.val').value);
       msg(i, true, 'Copied — paste it into the form.');
     };
-    el.querySelector('.val').oninput = (e) => { state.drafted[i].value = e.target.value; };
+    el.querySelector('.val').oninput = (e) => {
+      state.drafted[i].value = e.target.value === 'First available option'
+        ? FIRST_OPTION : e.target.value;
+    };
     box.append(el);
   });
 }
@@ -604,6 +658,11 @@ async function insertMany(idxs) {
   if (!r.ok) return setStatus(r.error);
   let ok = 0;
   r.results.forEach((res, k) => {
+    if (res.ok && res.selected) {
+      state.drafted[idxs[k]].value = res.selected;
+      const input = $('fields').querySelectorAll('.field')[idxs[k]]?.querySelector('.val');
+      if (input) input.value = res.selected;
+    }
     msg(idxs[k], res.ok, res.ok ? 'Inserted.' : res.reason);
     if (res.ok) ok++;
   });

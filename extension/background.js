@@ -1,7 +1,7 @@
 // Service worker: opens the side panel and relays panel <-> content-script messages.
 chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(() => {});
 
-const SELLER_RX = /^https:\/\/seller\.flipkart\.com\//;
+const SELLER_RX = /^https:\/\/(?:seller\.flipkart\.com|supplier\.meesho\.com)\//;
 
 function send(tabId, payload) {
   return new Promise((resolve) => {
@@ -32,7 +32,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     if (!SELLER_RX.test(tab.url || '')) {
       return sendResponse({
         ok: false,
-        error: 'Switch to the Flipkart Seller Hub tab, then try again.',
+        error: 'Switch to the Flipkart Seller Hub or Meesho Supplier tab, then try again.',
       });
     }
     let res = await send(tab.id, msg.payload);
@@ -43,7 +43,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
       }
       res = await send(tab.id, msg.payload);
       if (res.ok === false) {
-        res.error = `${res.error} — try reloading the Seller Hub tab.`;
+        res.error = `${res.error} — try reloading the seller form tab.`;
       }
     }
     sendResponse(res);

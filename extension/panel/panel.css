@@ -64,5 +64,6 @@ code { font-size: 11px; }
 .scanned ul { margin: 6px 0 0; padding-left: 15px; }
 .scanned li { margin-bottom: 3px; }
 .scanned code { background: var(--bg); padding: 1px 4px; border-radius: 4px; }
+.scanned .options { color: var(--muted); margin: 2px 0 5px; overflow-wrap: anywhere; }
 .field.otherTab { opacity: .55; }
 .snapnote { font-size: 11px; color: var(--muted); margin-top: 3px; }

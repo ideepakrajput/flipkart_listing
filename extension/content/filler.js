@@ -1,8 +1,8 @@
 /* GoProVeda Listing Assistant - page-side filler.
  *
  * SAFETY CONTRACT (do not weaken):
- *  - Fills form fields only. NEVER clicks submit / "Send to QC" / "Save",
- *    and never navigates.
+ *  - Fills form fields only. NEVER clicks "Send to QC", "Submit Catalog",
+ *    "Save", or any submit button, and never navigates.
  *  - Every fill is triggered by an explicit user click in the side panel.
  *  - Reads only the listing form already on screen. No scraping, no paging,
  *    no network requests of any kind.
@@ -15,6 +15,7 @@
   const norm = (s) =>
     String(s || '').replace(/[* ]/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const FIRST_OPTION = '__first_available_option__';
 
   /* ---------- React-safe value setting ---------------------------------- */
   function setNativeValue(el, value) {
@@ -68,7 +69,7 @@
 
   const CONTROL_SEL =
     'input:not([type=hidden]):not([type=file]):not([type=checkbox]):not([type=radio]),' +
-    'textarea, select, [role="combobox"]';
+    'textarea, select, [role="combobox"], button[aria-haspopup="listbox"]';
 
   // Flipkart renders most dropdowns as a plain <div> with a value/placeholder
   // and a chevron - no <select>, no role. Find those structurally.
@@ -198,7 +199,9 @@
       const dy = r.top - t.rect.bottom;
       if (dy >= -2 && dy < bestDy) { bestDy = dy; above = t; }
     }
-    return above && bestDy < 60 ? { text: above.text, dist: 500 + bestDy } : { text: '', dist: Infinity };
+    const maxAbove = location.hostname === 'supplier.meesho.com' ? 130 : 60;
+    return above && bestDy < maxAbove
+      ? { text: above.text, dist: 500 + bestDy } : { text: '', dist: Infinity };
   }
 
   function labelFor(ctrl, texts) {
@@ -250,19 +253,39 @@
 
   let scannedMap = new Map();
 
-  function scanFields() {
+  async function scanFields() {
     const { map, dropped, total } = fieldMap();
     scannedMap = map;
     const vertical = new URLSearchParams(location.hash.split('?')[1] || '').get('vertical');
+    const platform = location.hostname === 'supplier.meesho.com' ? 'meesho' : 'flipkart';
+    const fields = Array.from(map.entries()).map(([key, v]) => ({
+      key, label: v.label, kind: v.kind, count: 1,
+      current: String(v.el.value || v.el.innerText || '').trim(),
+      options: [],
+    }));
+
+    // Meesho does not publish these category-specific choices in the page
+    // markup until a dropdown is opened. Read them during the user's Scan
+    // click; never choose an option and restore the original scroll position.
+    if (platform === 'meesho') {
+      const startX = scrollX, startY = scrollY;
+      for (const field of fields.filter((f) => f.kind === 'dropdown')) {
+        const el = controlFor(field.key);
+        if (!el) continue;
+        field.options = await readDropdownOptions(el);
+        if (field.current && !/^select(?: one)?$/i.test(field.current) &&
+            !field.options.some((option) => norm(option) === norm(field.current))) {
+          field.options.unshift(field.current);
+        }
+      }
+      scrollTo(startX, startY);
+    }
     return {
-      fields: Array.from(map.entries()).map(([key, v]) => ({
-        key, label: v.label, kind: v.kind, count: 1,
-        current: String(v.el.value || v.el.innerText || '').trim(),
-      })),
+      fields,
       total,
       duplicates: dropped,
       unlabelled: Math.max(0, total - map.size - dropped),
-      vertical,
+      vertical, platform,
     };
   }
 
@@ -301,19 +324,53 @@
       norm(o.innerText) === norm(n.innerText)));
   }
 
+  async function readDropdownOptions(el) {
+    if (el.tagName === 'SELECT') {
+      return Array.from(el.options).map((option) => option.text.trim())
+        .filter((text) => text && !/^select(?: one)?$/i.test(text));
+    }
+    el.scrollIntoView({ block: 'center', behavior: 'auto' });
+    await sleep(80);
+    document.body.click();
+    await sleep(50);
+    const before = new Set(Array.from(document.querySelectorAll(MENU_SEL)).filter(onScreen));
+    const opener = (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA')
+      ? (el.parentElement || el) : el;
+    opener.click();
+    await sleep(280);
+    let found = dropdownOptions(before);
+    if (!found.length && opener !== el) {
+      el.click();
+      await sleep(280);
+      found = dropdownOptions(before);
+    }
+    const preferred = found.filter((node) =>
+      node.getAttribute('role') === 'option' || node.tagName === 'LI');
+    const nodes = preferred.length ? preferred : found;
+    const options = [...new Set(nodes.map((node) => (node.innerText || '').trim())
+      .filter((text) => text && !/^select(?: one)?$|^no (?:options?|results?)/i.test(text)))];
+    document.body.click();
+    await sleep(70);
+    invalidate();
+    return options;
+  }
+
   async function setDropdown(el, value, key) {
+    const first = value === FIRST_OPTION;
     if (el.tagName === 'SELECT') {
       const want = norm(value);
-      const opt = Array.from(el.options)
-        .find((o) => norm(o.text) === want || norm(o.value) === want);
+      const options = Array.from(el.options);
+      const opt = first
+        ? options.find((o) => o.value && !/^select(?: one)?$/i.test(o.text.trim()))
+        : options.find((o) => norm(o.text) === want || norm(o.value) === want);
       if (!opt) {
         return { ok: false,
-          reason: `"${value}" is not an option. Available: ${Array.from(el.options)
+          reason: `${first ? 'No selectable option found' : `"${value}" is not an option`}. Available: ${options
             .map((o) => o.text.trim()).filter(Boolean).slice(0, 8).join(', ')}` };
       }
       el.value = opt.value;
       el.dispatchEvent(new Event('change', { bubbles: true }));
-      return { ok: true };
+      return { ok: true, selected: opt.text.trim() };
     }
 
     const fieldRoot = rowFor(el) || el.parentElement || el;
@@ -337,7 +394,7 @@
     // Type into the panel's search box to narrow long lists (Country, Flavor…).
     const search = opened.find((n) => n.tagName === 'INPUT' &&
       ['text', 'search'].includes(n.type));
-    if (search) {
+    if (search && !first) {
       search.focus();
       search.setRangeText(String(value), 0, search.value.length, 'end');
       search.dispatchEvent(new Event('input', { bubbles: true }));
@@ -345,18 +402,27 @@
       await sleep(320);
     }
 
-    const want = norm(value);
+    let want = norm(value);
     const opts = dropdownOptions(before);
-    let hit = opts.find((o) => norm(o.innerText) === want);
-    if (!hit) {
+    const choices = opts.filter((o) => {
+      const text = (o.innerText || '').trim();
+      return text && !/^select(?: one)?$|^no (?:options?|results?)/i.test(text);
+    });
+    let hit = first
+      ? choices.find((o) => o.getAttribute('role') === 'option') ||
+        choices.find((o) => o.tagName === 'LI') || choices[0]
+      : opts.find((o) => norm(o.innerText) === want);
+    if (!hit && !first) {
       const near = opts.filter((o) => norm(o.innerText).startsWith(want));
       if (near.length === 1) hit = near[0];
     }
     if (!hit) {
       const sample = opts.map((o) => o.innerText.trim()).filter(Boolean).slice(0, 8).join(', ');
       document.body.click();
-      return { ok: false, reason: `No option "${value}". Saw: ${sample || '(none)'}` };
+      return { ok: false, reason: `${first ? 'No selectable option found' : `No option "${value}"`}. Saw: ${sample || '(none)'}` };
     }
+    const picked = (hit.innerText || '').trim();
+    want = norm(picked);
     for (const type of ['mousedown', 'mouseup', 'click']) {
       hit.dispatchEvent(new MouseEvent(type, { bubbles: true, cancelable: true, view: window }));
     }
@@ -365,8 +431,8 @@
     const selected = controlFor(key);
     const shown = nearbyValues(fieldRoot.isConnected ? fieldRoot : selected);
     return shown === want || shown.includes(want)
-      ? { ok: true }
-      : { ok: false, reason: `Option "${value}" was clicked but did not stick.` };
+      ? { ok: true, selected: picked }
+      : { ok: false, reason: `Option "${first ? picked : value}" was clicked but did not stick.` };
   }
 
   function flash(el, ok) {
@@ -505,7 +571,7 @@
       res = { ok: false, reason: String(e.message || e) };
     }
     flash(el, res.ok);
-    return { label, ok: res.ok, reason: res.reason };
+    return { label, ...res };
   }
 
   /* ---------- Messages --------------------------------------------------- */
@@ -527,7 +593,7 @@
           }
           sendResponse({ ok: true, rows, total: controls().length });
         }
-        else if (msg.action === 'SCAN') sendResponse({ ok: true, ...scanFields() });
+        else if (msg.action === 'SCAN') sendResponse({ ok: true, ...await scanFields() });
         else if (msg.action === 'FILL_ONE') sendResponse({ ok: true, result: await fillOne(msg.field) });
         else if (msg.action === 'FILL_MANY') {
           // Dropdown changes can re-render the form, so select them first. Text

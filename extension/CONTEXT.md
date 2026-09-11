@@ -12,10 +12,10 @@ account-safety rules. Read §0, §3 and §7 before touching anything network-fac
 
 ## 1. What this is
 
-A Chrome MV3 side-panel extension for a single Flipkart seller (GOPROVEDA,
-brand *Promishor*). It reads product-label photographs with Gemini and drafts
-values for the Flipkart Seller Hub "Add a Single Listing" form, which the user
-reviews and inserts field by field.
+A Chrome MV3 side-panel extension for GOPROVEDA (brand *Promishor*). It reads
+product-label photographs with Gemini and drafts values for Flipkart Seller Hub
+and Meesho Supplier listing forms, which the user reviews and inserts field by
+field.
 
 It exists because Flipkart's **Listing API cannot create products** — it needs an
 existing FSN, has no image upload, and no product/catalogue fields. Roughly 21 of
@@ -52,7 +52,7 @@ account (`../CLAUDE.md` §7 lists the documented penalties).
 
 ```
 manifest.json          MV3. sidePanel + storage + activeTab + scripting.
-                       Hosts: seller.flipkart.com, generativelanguage.googleapis.com
+                       Hosts: seller.flipkart.com, supplier.meesho.com, Gemini
 
 background.js  (52)    Service worker. Relays panel -> content script.
                        ensureInjected() injects filler.js on demand, because the

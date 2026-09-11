@@ -20,7 +20,7 @@
       <button id="saveSettings">Save</button>
     </div>
     <p class="hint">Stored in this browser only (<code>chrome.storage.local</code>).
-      Never sent to Flipkart.</p>
+      Never sent to either marketplace.</p>
   </section>
 
   <section id="warn" class="warn" hidden></section>
@@ -46,7 +46,7 @@
         <button id="scan" class="secondary">Scan form fields</button>
         <button id="dump" class="secondary" title="Copies the form's HTML so it can be debugged">Copy form HTML</button>
       </div>
-      <p class="hint" id="scanHint">Open the listing form in the Seller Hub tab, and make sure that tab is the active one.</p>
+      <p class="hint" id="scanHint">Open the Flipkart or Meesho listing form and make sure that tab is active.</p>
       <div id="scanned" class="scanned" hidden></div>
     </li>
 
@@ -65,7 +65,7 @@
       <h2>Review &amp; insert</h2>
       <button id="copyRow" class="secondary" title="Tab-separated, for the bulk catalogue sheet">Copy as row</button>
     </div>
-    <p class="hint">Nothing is submitted. You still click <b>Send to QC</b> yourself.</p>
+    <p class="hint" id="submitHint">Nothing is submitted. You still click the marketplace submit button yourself.</p>
     <div id="fields"></div>
   </section>
 
