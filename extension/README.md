@@ -103,6 +103,7 @@ its 95-column schema and dropdown option lists into the seed.
 - **Meesho dropdown options are discovered when opened.** If Gemini cannot infer
   one, the assistant offers the first available option at low confidence for
   review; GST and HSN are never given arbitrary first-option fallbacks.
+  Net Quantity (N) defaults to `1` unless the label shows an item count.
 - **Gemini transcribes; it does not verify.** Always check FSSAI number, net
   weight, dates and manufacturer details against the physical pack. Wrong legal
   metrology data on a live listing is a compliance problem, not a typo.

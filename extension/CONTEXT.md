@@ -149,8 +149,12 @@ impossible.
   `el.value = x` is invisible to it — the field looks filled but submits empty.
   Use `setNativeValue()`: the *prototype* setter, then `input` + `change` events.
   Every write is verified by reading the value back.
-- **Dropdown:** click the div, wait, type into the panel's search box to filter,
-  click the exact option. Failures report the options actually seen.
+- **Dropdown:** click the div, find **its panel** (`menuPanel()`: newly visible,
+  floating, drawn on top, hugging the control's edge), type into the panel's
+  search box, click the exact option **inside that panel**. Tick-box menus
+  (Meesho Size) then need **Apply**. Close with `closeMenu()` — a real
+  pointer click on blank background/backdrop, verified — before moving on.
+  Failures report the options actually seen.
 - **Date:** `<input type=date>` needs `yyyy-mm-dd` regardless of display format.
 
 ---
@@ -167,6 +171,8 @@ Do not reintroduce these. Each cost an iteration.
 | `isInPopup`: any positioned ancestor containing a `[role=option]` | Flipkart keeps closed dropdowns' options in the DOM inside the form container, so the **whole form** matched and every field was excluded. Now also requires ≤2 inputs in that container. |
 | Dropdown = div with an svg + short text | Every label cell is `Label ⓘ` — an svg with short text. Label cells and section headings (`Price Details`, `Tax Details`) were detected as dropdowns, giving 52 controls for ~23 fields and `x2` on every label. Fixed by requiring a border and a right-aligned icon. |
 | Fuzzy prefix matching label → control | Put a value into the wrong field (`Luxury Cess = 5`). Matching is now exact against `fieldMap`. |
+| Closing a menu with `document.body.click()` | Meesho menus only close on a real outside press. Scan left all 13 menus stacked open over the form. |
+| Options = anything newly visible on the page | Meesho re-renders the footer when a menu opens, so `Discard Catalog` / `Submit Catalog` were read as options — and the fill **clicked Discard Catalog** (reproduced on a mock). Options and clicks are now confined to the open panel, and `DANGER_RX` refuses submit/discard/save text outright. |
 
 **Method note:** the repeated failure mode was inferring DOM structure from
 screenshots and patching heuristics on top of heuristics. The geometric approach

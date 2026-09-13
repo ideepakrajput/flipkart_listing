@@ -267,16 +267,21 @@
     // Meesho does not publish these category-specific choices in the page
     // markup until a dropdown is opened. Read them during the user's Scan
     // click; never choose an option and restore the original scroll position.
+    // Each menu must close before the next opens - if one will not, stop
+    // rather than stack open menus over the whole form.
+    let stuckMenu = '';
     if (platform === 'meesho') {
       const startX = scrollX, startY = scrollY;
       for (const field of fields.filter((f) => f.kind === 'dropdown')) {
         const el = controlFor(field.key);
         if (!el) continue;
-        field.options = await readDropdownOptions(el);
+        const read = await readDropdownOptions(el);
+        field.options = read.options;
         if (field.current && !/^select(?: one)?$/i.test(field.current) &&
             !field.options.some((option) => norm(option) === norm(field.current))) {
           field.options.unshift(field.current);
         }
+        if (!read.closed) { stuckMenu = field.label; break; }
       }
       scrollTo(startX, startY);
     }
@@ -285,7 +290,7 @@
       total,
       duplicates: dropped,
       unlabelled: Math.max(0, total - map.size - dropped),
-      vertical, platform,
+      vertical, platform, stuckMenu,
     };
   }
 
@@ -298,61 +303,246 @@
     return fresh.get(key)?.el || null;
   }
 
-  /* ---------- Dropdowns -------------------------------------------------- */
-  const MENU_SEL = 'input,[role="option"],li,div,span';
+  /* ---------- Dropdowns --------------------------------------------------
+   * An open dropdown is a floating panel beside its control. Every read and
+   * every click is confined to that panel: a page-wide search once offered the
+   * footer's "Discard Catalog" button text as a Net Quantity option.        */
+  const MENU_SEL = 'input,[role="option"],[role="listbox"],[role="menu"],ul,li,div,span';
   const onScreen = (el) => {
-    if (!visible(el)) return false;
+    if (!el?.isConnected) return false;
     const r = el.getBoundingClientRect();
-    return r.bottom > 0 && r.right > 0 && r.top < innerHeight && r.left < innerWidth;
+    return r.bottom > 0 && r.right > 0 && r.top < innerHeight && r.left < innerWidth &&
+      visible(el);
+  };
+  const snapshot = () =>
+    new Set(Array.from(document.querySelectorAll(MENU_SEL)).filter(onScreen));
+  const clean = (el) => String(el?.innerText || '').replace(/\s+/g, ' ').trim();
+  const ownText = (el) => Array.from(el.childNodes).filter((n) => n.nodeType === 3)
+    .map((n) => n.textContent).join('').replace(/\s+/g, ' ').trim();
+  const escRx = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const waitUntil = async (test, ms) => {
+    for (let t = 0; t < ms; t += 60) {
+      if (test()) return true;
+      await sleep(60);
+    }
+    return test();
   };
 
-  // Only consider controls/options that became visible after this dropdown was
-  // clicked. Seller Hub keeps unrelated header suggestions in the DOM, so a
-  // global option search can otherwise select the LID/Rate Card search popup.
-  const newlyVisible = (before) => Array.from(document.querySelectorAll(MENU_SEL))
-    .filter((n) => onScreen(n) && !before.has(n));
+  // Hard stop: nothing that submits, discards or navigates is ever clicked.
+  const DANGER_RX =
+    /\b(?:submit|discard|save|delete|remove|send to qc|go back|publish|upload|change)\b/i;
+  const PANEL_ACTION_RX =
+    /^(?:apply|done|ok|clear(?: filter| all)?|reset|cancel|close|select all)$/i;
+  const NON_OPTION_RX =
+    /^select(?: one)?$|^search\b|^\d+ selected$|^no\b.*\b(?:options?|results?|data|match(?:es)?)\b|\bnot found$|^loading\b/i;
+  const isDangerous = (el) => DANGER_RX.test(clean(el.closest('button,a,[role="button"]') || el));
+  const holdsDangerButton = (el) => Array.from(el.querySelectorAll('button,a,[role="button"]'))
+    .some((b) => DANGER_RX.test(clean(b)));
 
-  function dropdownOptions(before) {
-    const nodes = newlyVisible(before).filter((n) => {
-      const text = (n.innerText || '').trim();
-      return n.tagName !== 'INPUT' && !n.querySelector('input') &&
-             text && text.length < 60;
-    });
-    // Prefer the innermost node for each option; clicking it bubbles to the
-    // option wrapper and avoids treating the whole menu as one option.
-    return nodes.filter((n) => !nodes.some((o) => o !== n && n.contains(o) &&
-      norm(o.innerText) === norm(n.innerText)));
+  // Positioned out of the normal flow somewhere between el and the field.
+  const isFloating = (el, ctrl) => {
+    for (let n = el; n && n !== document.body && !n.contains(ctrl); n = n.parentElement) {
+      const pos = getComputedStyle(n).position;
+      if (pos === 'absolute' || pos === 'fixed') return true;
+    }
+    return false;
+  };
+
+  const topmostAt = (el) => {
+    const r = el.getBoundingClientRect();
+    const x = Math.min(Math.max(r.left + r.width / 2, 0), innerWidth - 1);
+    const y = Math.min(Math.max(r.top + Math.min(r.height / 2, 24), 0), innerHeight - 1);
+    const hit = document.elementFromPoint(x, y);
+    return !!hit && (hit === el || el.contains(hit));
+  };
+
+  const insideScannedControl = (el) =>
+    Array.from(scannedMap.values()).some((f) => f.el?.contains(el));
+
+  /* The open panel: newly visible, drawn on top, not part of the field, hugging
+   * the control's top or bottom edge and aligned with it. Largest wins, so the
+   * whole panel (search box, options, Apply) is found - not a single option. */
+  function menuPanel(ctrl, before) {
+    const c = ctrl.getBoundingClientRect();
+    const vw = innerWidth, vh = innerHeight;
+    let strict = null, loose = null, strictArea = 0, looseArea = 0;
+    for (const n of document.querySelectorAll(MENU_SEL)) {
+      if (before.has(n) || n.contains(ctrl) || ctrl.contains(n)) continue;
+      const r = n.getBoundingClientRect();
+      if (r.width < 40 || r.height < 20) continue;
+      if (r.width > vw * 0.7 || r.height > vh * 0.9 || r.width * r.height > vw * vh * 0.5) continue;
+      const overlapX = Math.min(r.right, c.right) - Math.max(r.left, c.left);
+      if (overlapX < Math.min(r.width, c.width) * 0.5) continue;
+      if (Math.max(r.top - c.bottom, c.top - r.bottom, 0) > 40) continue;
+      if (!onScreen(n) || (!clean(n) && !n.querySelector('input'))) continue;
+      if (!topmostAt(n) || holdsDangerButton(n)) continue;
+      const area = r.width * r.height;
+      if (isFloating(n, ctrl)) {
+        if (area > strictArea) { strict = n; strictArea = area; }
+      } else if (!n.querySelector('textarea,select') && area > looseArea) {
+        loose = n; looseArea = area;
+      }
+    }
+    return strict || loose;
+  }
+
+  // Something new is floating over the page - used when the panel itself could
+  // not be identified, so a menu is never silently left open.
+  function strayMenu(before, ctrl) {
+    for (const n of document.querySelectorAll(MENU_SEL)) {
+      if (before.has(n) || ctrl.contains(n) || n.contains(ctrl)) continue;
+      const r = n.getBoundingClientRect();
+      if (r.width < 40 || r.height < 20 || !onScreen(n) || !clean(n)) continue;
+      if (n.closest('button,a,[role="button"]') || holdsDangerButton(n)) continue;
+      if (!isFloating(n, ctrl) || !topmostAt(n) || insideScannedControl(n)) continue;
+      return true;
+    }
+    return false;
+  }
+
+  const INTERACTIVE_SEL =
+    'a,button,input,select,textarea,label,summary,option,iframe,video,audio,' +
+    '[role="button"],[role="link"],[role="checkbox"],[role="radio"],[role="option"],' +
+    '[role="menuitem"],[role="tab"],[role="switch"],[role="combobox"],[contenteditable],' +
+    '[tabindex]:not([tabindex="-1"])';
+
+  // Where a person clicks to dismiss a menu: bare page background, or the
+  // menu's own transparent backdrop. Never a control, link, text, or anything
+  // with a pointer cursor (an image drop zone, a card).
+  function blankSpot(panel, ctrl) {
+    const avoid = [panel, ctrl].filter((e) => e?.isConnected).map((e) => e.getBoundingClientRect());
+    const w = document.documentElement.clientWidth, h = innerHeight;
+    for (const fy of [0.5, 0.35, 0.65, 0.2, 0.8]) {
+      for (const fx of [0.97, 0.03, 0.62, 0.85, 0.45]) {
+        const x = Math.round(w * fx), y = Math.round(h * fy);
+        if (avoid.some((r) => x > r.left - 12 && x < r.right + 12 &&
+                              y > r.top - 12 && y < r.bottom + 12)) continue;
+        const target = document.elementFromPoint(x, y);
+        if (!target || target.closest(INTERACTIVE_SEL) || panel?.contains(target)) continue;
+        if (ownText(target) || getComputedStyle(target).cursor === 'pointer') continue;
+        if (insideScannedControl(target)) continue;
+        return { target, x, y };
+      }
+    }
+    return null;
+  }
+
+  function pointerClick(target, x, y) {
+    const base = { bubbles: true, cancelable: true, composed: true, view: window,
+      clientX: x, clientY: y, button: 0 };
+    const ptr = { ...base, pointerId: 1, pointerType: 'mouse', isPrimary: true };
+    target.dispatchEvent(new PointerEvent('pointerdown', { ...ptr, buttons: 1 }));
+    target.dispatchEvent(new MouseEvent('mousedown', { ...base, buttons: 1 }));
+    target.dispatchEvent(new PointerEvent('pointerup', ptr));
+    target.dispatchEvent(new MouseEvent('mouseup', base));
+    target.dispatchEvent(new MouseEvent('click', base));
+  }
+
+  function pressClick(el) {
+    for (const type of ['mousedown', 'mouseup', 'click']) {
+      el.dispatchEvent(new MouseEvent(type, { bubbles: true, cancelable: true, view: window }));
+    }
+  }
+
+  /* Meesho ignores document.body.click(): a menu only closes on a real click
+   * outside it, so Scan used to leave every dropdown stacked open over the form.
+   * Dismiss it the way a person would, and confirm it actually closed.     */
+  async function closeMenu(panel, ctrl, opener, before) {
+    const isOpen = () => (panel?.isConnected ? onScreen(panel) : strayMenu(before, ctrl));
+    if (!isOpen()) return true;
+    const active = document.activeElement;
+    if (active && panel?.contains(active)) active.blur();
+
+    const spot = blankSpot(panel, ctrl);
+    if (spot) {
+      pointerClick(spot.target, spot.x, spot.y);
+      if (await waitUntil(() => !isOpen(), 480)) return true;
+    }
+    pointerClick(document.body, 1, 1);
+    if (await waitUntil(() => !isOpen(), 300)) return true;
+
+    // Last resort: most dropdowns toggle shut when their own box is clicked
+    // again. Only when this exact panel is verifiably still open, or it reopens.
+    if (panel?.isConnected && ctrl.getAttribute('aria-expanded') !== 'false') {
+      opener.click();
+      if (await waitUntil(() => !isOpen(), 480)) return true;
+    }
+    return false;
+  }
+
+  async function openMenu(el) {
+    el.scrollIntoView({ block: 'center', behavior: 'auto' });
+    await sleep(80);
+    const before = snapshot();
+    const opener = (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA')
+      ? (el.parentElement || el) : el;
+    opener.click();
+    let panel = null;
+    for (const ms of [280, 260]) {
+      await sleep(ms);
+      if ((panel = menuPanel(el, before))) return { panel, opener, before };
+    }
+    if (opener !== el && !strayMenu(before, el)) {
+      el.click();
+      await sleep(300);
+      panel = menuPanel(el, before);
+    }
+    return { panel, opener, before };
+  }
+
+  // Option elements inside the panel. Panel buttons (Apply, Clear Filter) and
+  // placeholders ("No search results found") are not options.
+  function menuOptions(panel) {
+    const usable = (n) => {
+      const text = clean(n);
+      if (!text || text.length > 60 || String(n.innerText).trim().includes('\n')) return false;
+      if (PANEL_ACTION_RX.test(text) || NON_OPTION_RX.test(text)) return false;
+      const act = n.closest('button,a,[role="button"]');
+      if (act && (PANEL_ACTION_RX.test(clean(act)) || DANGER_RX.test(clean(act)))) return false;
+      return visible(n);
+    };
+    const roles = Array.from(panel.querySelectorAll('[role="option"],li')).filter(usable);
+    if (roles.length) return roles;
+    // No option roles: take the elements that hold the text, keeping the outer
+    // one when an option is split across nodes ("100-200" + "gm").
+    const leaves = Array.from(panel.querySelectorAll('*'))
+      .filter((n) => n.tagName !== 'INPUT' && ownText(n) && usable(n));
+    return leaves.filter((n) => !leaves.some((o) => o !== n && o.contains(n)));
+  }
+
+  const CHECK_SEL = 'input[type="checkbox"],[role="checkbox"],[aria-checked]';
+  const isChecked = (box) =>
+    box.tagName === 'INPUT' ? box.checked : box.getAttribute('aria-checked') === 'true';
+
+  // The tick box on this option's own row - never one shared with other options
+  // (a "Select all" box would otherwise be found).
+  function checkboxFor(option, panel, opts) {
+    for (let n = option; n && n !== panel && panel.contains(n); n = n.parentElement) {
+      if (opts.some((o) => o !== option && n.contains(o))) return null;
+      if (n.matches(CHECK_SEL)) return n;
+      const boxes = n.querySelectorAll(CHECK_SEL);
+      if (boxes.length === 1) return boxes[0];
+      if (boxes.length > 1) return null;
+    }
+    return null;
+  }
+
+  function applyButton(panel) {
+    const found = Array.from(panel.querySelectorAll('button,[role="button"],a,span,div'))
+      .filter((n) => /^(?:apply|done|ok)$/i.test(clean(n)) && visible(n));
+    return found.find((n) => !found.some((o) => o !== n && n.contains(o))) || null;
   }
 
   async function readDropdownOptions(el) {
     if (el.tagName === 'SELECT') {
-      return Array.from(el.options).map((option) => option.text.trim())
-        .filter((text) => text && !/^select(?: one)?$/i.test(text));
+      return { closed: true, options: Array.from(el.options).map((option) => option.text.trim())
+        .filter((text) => text && !/^select(?: one)?$/i.test(text)) };
     }
-    el.scrollIntoView({ block: 'center', behavior: 'auto' });
-    await sleep(80);
-    document.body.click();
-    await sleep(50);
-    const before = new Set(Array.from(document.querySelectorAll(MENU_SEL)).filter(onScreen));
-    const opener = (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA')
-      ? (el.parentElement || el) : el;
-    opener.click();
-    await sleep(280);
-    let found = dropdownOptions(before);
-    if (!found.length && opener !== el) {
-      el.click();
-      await sleep(280);
-      found = dropdownOptions(before);
-    }
-    const preferred = found.filter((node) =>
-      node.getAttribute('role') === 'option' || node.tagName === 'LI');
-    const nodes = preferred.length ? preferred : found;
-    const options = [...new Set(nodes.map((node) => (node.innerText || '').trim())
-      .filter((text) => text && !/^select(?: one)?$|^no (?:options?|results?)/i.test(text)))];
-    document.body.click();
-    await sleep(70);
+    const { panel, opener, before } = await openMenu(el);
+    const options = panel ? [...new Set(menuOptions(panel).map(clean))] : [];
+    const closed = await closeMenu(panel, el, opener, before);
     invalidate();
-    return options;
+    return { options, closed };
   }
 
   async function setDropdown(el, value, key) {
@@ -373,66 +563,82 @@
       return { ok: true, selected: opt.text.trim() };
     }
 
+    // Picking an already-selected option in a tick-box menu would untick it.
+    const shownBefore = String(el.value || el.innerText || '').replace(/\s+/g, ' ').trim();
+    if (!first && shownBefore && norm(shownBefore) === norm(value)) {
+      return { ok: true, selected: shownBefore };
+    }
+
     const fieldRoot = rowFor(el) || el.parentElement || el;
     invalidate();
-    document.body.click();                 // close any menu the user left open
-    await sleep(60);
-    const before = new Set(Array.from(document.querySelectorAll(MENU_SEL)).filter(onScreen));
-    const opener = (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA')
-      ? (el.parentElement || el) : el;
-    opener.click();
-    await sleep(280);
+    const menu = await openMenu(el);
+    const { opener, before } = menu;
+    let panel = menu.panel;
+    const fail = async (reason) => {
+      const closed = await closeMenu(panel, el, opener, before);
+      invalidate();
+      return { ok: false,
+        reason: closed ? reason : `${reason} The menu stayed open — click the page to close it.` };
+    };
+    if (!panel) return fail('The dropdown did not open. Pick it manually.');
 
-    let opened = newlyVisible(before);
-    if (!opened.length && opener !== el) {
-      el.click();
-      await sleep(300);
-      opened = newlyVisible(before);
-    }
-    if (!opened.length) return { ok: false, reason: 'The dropdown did not open. Pick it manually.' };
-
-    // Type into the panel's search box to narrow long lists (Country, Flavor…).
-    const search = opened.find((n) => n.tagName === 'INPUT' &&
-      ['text', 'search'].includes(n.type));
+    // Type into the panel's search box to narrow long lists (Country, Net Quantity…).
+    const search = Array.from(panel.querySelectorAll('input'))
+      .find((n) => ['text', 'search'].includes(n.type) && visible(n));
     if (search && !first) {
       search.focus();
       search.setRangeText(String(value), 0, search.value.length, 'end');
       search.dispatchEvent(new Event('input', { bubbles: true }));
       search.dispatchEvent(new Event('change', { bubbles: true }));
       await sleep(320);
+      if (!panel.isConnected) panel = menuPanel(el, before) || panel;
     }
 
     let want = norm(value);
-    const opts = dropdownOptions(before);
-    const choices = opts.filter((o) => {
-      const text = (o.innerText || '').trim();
-      return text && !/^select(?: one)?$|^no (?:options?|results?)/i.test(text);
-    });
-    let hit = first
-      ? choices.find((o) => o.getAttribute('role') === 'option') ||
-        choices.find((o) => o.tagName === 'LI') || choices[0]
-      : opts.find((o) => norm(o.innerText) === want);
+    const opts = menuOptions(panel);
+    let hit = first ? opts[0] : opts.find((o) => norm(clean(o)) === want);
     if (!hit && !first) {
-      const near = opts.filter((o) => norm(o.innerText).startsWith(want));
+      const near = opts.filter((o) => norm(clean(o)).startsWith(want));
       if (near.length === 1) hit = near[0];
     }
     if (!hit) {
-      const sample = opts.map((o) => o.innerText.trim()).filter(Boolean).slice(0, 8).join(', ');
-      document.body.click();
-      return { ok: false, reason: `${first ? 'No selectable option found' : `No option "${value}"`}. Saw: ${sample || '(none)'}` };
+      const sample = opts.map(clean).slice(0, 8).join(', ');
+      return fail(`${first ? 'No selectable option found' : `No option "${value}"`}. Saw: ${sample || '(none)'}.`);
     }
-    const picked = (hit.innerText || '').trim();
+    const picked = clean(hit);
+    if (isDangerous(hit)) return fail(`Refused to click "${picked}".`);
     want = norm(picked);
-    for (const type of ['mousedown', 'mouseup', 'click']) {
-      hit.dispatchEvent(new MouseEvent(type, { bubbles: true, cancelable: true, view: window }));
+
+    const box = checkboxFor(hit, panel, opts);
+    if (!box || !isChecked(box)) {
+      pressClick(hit);
+      await sleep(220);
+      if (box?.isConnected && !isChecked(box)) {
+        box.click();
+        await sleep(160);
+      }
     }
-    await sleep(220);
+    // Tick-box menus (Meesho Size) only commit the choice on Apply.
+    const apply = onScreen(panel) ? applyButton(panel) : null;
+    if (apply) {
+      pressClick(apply);
+      await sleep(300);
+    }
+
+    const closed = await closeMenu(panel, el, opener, before);
+    await sleep(80);
     invalidate();
-    const selected = controlFor(key);
-    const shown = nearbyValues(fieldRoot.isConnected ? fieldRoot : selected);
-    return shown === want || shown.includes(want)
-      ? { ok: true, selected: picked }
-      : { ok: false, reason: `Option "${first ? picked : value}" was clicked but did not stick.` };
+    const now = controlFor(key) || el;
+    const shown = norm(now.value || now.innerText);
+    const rx = new RegExp(`(?:^| )${escRx(want)}(?: |$)`);
+    const stuck = shown === want || rx.test(shown) ||
+      (!!apply && /\b[1-9]\d* selected\b/.test(shown)) ||
+      (closed && fieldRoot.isConnected && rx.test(norm(fieldRoot.innerText)));
+    const note = closed ? undefined : 'The menu stayed open — click the page to close it.';
+    return stuck
+      ? { ok: true, selected: picked, note }
+      : { ok: false, reason: `Option "${first ? picked : value}" was clicked but did not stick.` +
+          (note ? ` ${note}` : '') };
   }
 
   function flash(el, ok) {

@@ -147,7 +147,11 @@ $('scan').onclick = async () => {
     (r.unlabelled ? `; ${r.unlabelled} unlabelled control(s) ignored` : '') +
     (state.platform === 'meesho'
       ? `. Meesho form detected; ${options} live dropdown option(s) read.`
-      : '. Switch tabs in Seller Hub and rescan to cover the rest.');
+      : '. Switch tabs in Seller Hub and rescan to cover the rest.') +
+    (r.stuckMenu
+      ? ` The "${r.stuckMenu}" menu would not close, so reading stopped there — ` +
+        'click the page to close it, then scan again.'
+      : '');
   $('submitHint').innerHTML = state.platform === 'meesho'
     ? 'Nothing is submitted. You still click <b>Submit Catalog</b> yourself.'
     : 'Nothing is submitted. You still click <b>Send to QC</b> yourself.';
@@ -360,6 +364,13 @@ const DEFAULT_LABELS = {
   maximum_shelf_life: ['maximum shelf life'],
   maximum_shelf_life_unit: ['maximum shelf life unit'],
   brand: ['brand'],
+  net_quantity: ['net quantity (n)'],
+};
+
+// Meesho's Net Quantity (N) list runs 1-95 and on past 500, so "first option"
+// means nothing there. Start from a single item when the label gives no count.
+const PLATFORM_DEFAULTS = {
+  meesho: { net_quantity: '1' },
 };
 
 const REQUESTED_DEFAULTS = {
@@ -428,7 +439,10 @@ function addUsageInstructions(drafted, value) {
 function addMissingDefaults(drafted, category) {
   const categoryDefaults = state.seed.categories[category]?.defaults || {};
   const productDefaults = PRODUCT_DEFAULTS[category] || {};
-  const defaults = { ...categoryDefaults, ...productDefaults, ...REQUESTED_DEFAULTS };
+  const platformDefaults = PLATFORM_DEFAULTS[state.platform] || {};
+  const defaults = {
+    ...categoryDefaults, ...productDefaults, ...platformDefaults, ...REQUESTED_DEFAULTS,
+  };
   const present = new Set(drafted.filter((f) => !f.otherTab).map((f) => nkey(f.label)));
   for (const [key, value] of Object.entries(defaults)) {
     const aliases = DEFAULT_LABELS[key];
@@ -465,6 +479,7 @@ function addMissingDefaults(drafted, category) {
       confidence: crossMarketTax ? 'low' : 'medium',
       source: crossMarketTax ? 'cross-market category default — review' :
         key in REQUESTED_DEFAULTS ? 'requested default' :
+        key in platformDefaults ? 'default single item — change for multi-packs' :
         key in productDefaults ? 'previous listing default' : 'house default' });
     present.add(nkey(field.label));
   }
@@ -663,7 +678,7 @@ async function insertMany(idxs) {
       const input = $('fields').querySelectorAll('.field')[idxs[k]]?.querySelector('.val');
       if (input) input.value = res.selected;
     }
-    msg(idxs[k], res.ok, res.ok ? 'Inserted.' : res.reason);
+    msg(idxs[k], res.ok, res.ok ? `Inserted.${res.note ? ` ${res.note}` : ''}` : res.reason);
     if (res.ok) ok++;
   });
   setStatus(`${ok}/${r.results.length} inserted. Anything that failed, use Copy and paste it.`);
